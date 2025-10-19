@@ -1,0 +1,13 @@
+:root {
+
+}
+
+#Root > .unity-button {
+  background-color: #4a6fa5;
+  color: white;
+  border-color: #333;
+}
+
+#Root > .unity-button:hover {
+  background-color: #5d8bc9;
+}

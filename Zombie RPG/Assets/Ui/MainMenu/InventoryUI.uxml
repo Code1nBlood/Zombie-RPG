@@ -1,0 +1,32 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="InventoryRoot" style="flex-direction: column; padding: 20px; background-color: rgb(161, 161, 161);">
+
+        <ui:Button name="CloseButton" text="✕" 
+                   style="position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; 
+                          unity-text-align: middle-center; background-color: rgb(200, 60, 60); 
+                          color: white; border-radius: 4px;" />
+
+        <ui:Label text="Инвентарь" style="font-size: 24px; margin-bottom: 20px;" />
+        <ui:Label text="Бусты" style="margin-bottom: 10px;" />
+        <ui:VisualElement style="flex-direction: row; margin-bottom: 20px;">
+            <ui:VisualElement class="boost-slot" style="width: 80px; height: 80px; background-color: rgb(85, 85, 85); margin-right: 10px;" />
+            <ui:VisualElement class="boost-slot" style="width: 80px; height: 80px; background-color: rgb(85, 85, 85);" />
+            <ui:VisualElement class="boost-slot" style="width: 80px; height: 80px; background-color: rgb(85, 85, 85); margin-left: 10px;" />
+        </ui:VisualElement>
+        <ui:Label text="Зелья" style="margin-bottom: 10px;" />
+        <ui:VisualElement style="flex-direction: row;">
+            <ui:VisualElement class="potion-slot" style="width: 50px; height: 50px; background-color: rgb(119, 170, 51); margin-right: 5px;" />
+            <ui:VisualElement class="potion-slot" style="width: 50px; height: 50px; background-color: rgb(119, 170, 51);" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="InventoryAllItems" style="flex-direction: row; flex-grow: 1; color: white; background-color: rgb(108, 103, 103); padding: 10px; gap: 20px;">
+        <ui:VisualElement style="flex-direction: column; flex-grow: 1;">
+            <ui:Label text="Бусты" style="unity-text-align: middle-center; margin-bottom: 5px;" />
+            <ui:ListView name="BustList" style="flex-grow: 1; background-color: rgb(70, 70, 70);" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-direction: column; flex-grow: 1;">
+            <ui:Label text="Зелья" style="unity-text-align: middle-center; margin-bottom: 5px;" />
+            <ui:ListView name="PosionList" style="flex-grow: 1; background-color: rgb(70, 70, 70);" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
