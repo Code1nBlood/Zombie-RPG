@@ -1,0 +1,11 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement name="contractsWindow" style="flex-direction: column; padding: 20px; position: relative; width: 100%; height: 100%; align-items: center; background-color: rgb(155, 147, 209);">
+        <ui:Label text="КОНТРАКТЫ" style="font-size: 32px; font-weight: bold; text-align: center; margin-bottom: 20px;" />
+        <ui:VisualElement style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 20px;">
+            <ui:Label name="freeRefreshLabel" text="Бесплатное обновление через: --" style="font-size: 14px;" />
+            <ui:Button name="paidRefreshButton" text="Обновить за 100 контракт-койнов" style="font-size: 14px; background-color: #ff6b35; color: white; border: none; padding: 5px 10px; border-radius: 4px;" />
+        </ui:VisualElement>
+        <ui:VisualElement name="contractsContainer" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; flex-grow: 1;" />
+        <ui:Button name="closeButton" text="✕" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; font-size: 24px; align-items: center; justify-content: center; background-color: rgb(255, 71, 87); color: white; border: none; border-radius: 50%;" />
+    </ui:VisualElement>
+</ui:UXML>

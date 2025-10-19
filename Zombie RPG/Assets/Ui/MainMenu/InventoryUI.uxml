@@ -1,12 +1,7 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement name="InventoryRoot" style="flex-direction: column; padding: 20px; background-color: rgb(161, 161, 161);">
-
-        <ui:Button name="CloseButton" text="✕" 
-                   style="position: absolute; top: 5px; right: 5px; width: 24px; height: 24px; 
-                          unity-text-align: middle-center; background-color: rgb(200, 60, 60); 
-                          color: white; border-radius: 4px;" />
-
-        <ui:Label text="Инвентарь" style="font-size: 24px; margin-bottom: 20px;" />
+        <ui:Button name="CloseButton" text="✕" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; font-size: 24px; align-items: center; justify-content: center; background-color: rgb(255, 71, 87); color: white; border: none; border-radius: 50%;" />
+        <ui:Label text="Инвентарь" style="font-size: 24px; margin-bottom: 20px; width: 854px;" />
         <ui:Label text="Бусты" style="margin-bottom: 10px;" />
         <ui:VisualElement style="flex-direction: row; margin-bottom: 20px;">
             <ui:VisualElement class="boost-slot" style="width: 80px; height: 80px; background-color: rgb(85, 85, 85); margin-right: 10px;" />
