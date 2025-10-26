@@ -17,11 +17,11 @@
     <ui:VisualElement name="InventoryAllItems" style="flex-direction: row; flex-grow: 1; color: white; background-color: rgb(108, 103, 103); padding: 10px; gap: 20px;">
         <ui:VisualElement style="flex-direction: column; flex-grow: 1;">
             <ui:Label text="Бусты" style="unity-text-align: middle-center; margin-bottom: 5px;" />
-            <ui:ListView name="BustList" style="flex-grow: 1; background-color: rgb(70, 70, 70);" />
+            <ui:ListView name="BoostList" style="flex-grow: 1; background-color: rgb(70, 70, 70);" />
         </ui:VisualElement>
         <ui:VisualElement style="flex-direction: column; flex-grow: 1;">
             <ui:Label text="Зелья" style="unity-text-align: middle-center; margin-bottom: 5px;" />
-            <ui:ListView name="PosionList" style="flex-grow: 1; background-color: rgb(70, 70, 70);" />
+            <ui:ListView name="PotionList" style="flex-grow: 1; background-color: rgb(70, 70, 70); -unity-text-align: upper-left;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

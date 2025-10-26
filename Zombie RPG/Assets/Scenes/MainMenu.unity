@@ -883,9 +883,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ui
   mainMenuUxml: {fileID: 9197481963319205126, guid: e75613e9ed2135147af73061076aa9fe, type: 3}
-  inventoryUxml: {fileID: 9197481963319205126, guid: f324e9f5e5473f64199b6f879e2a9875, type: 3}
   contractsUxml: {fileID: 9197481963319205126, guid: ed5e38211dee18b41b970ea282f2aab4, type: 3}
   contractCardUxml: {fileID: 9197481963319205126, guid: 676f3b9505728a34aa5c8f3df6e8ebcf, type: 3}
+  inventoryManager: {fileID: 1520341733}
 --- !u!1 &599687242
 GameObject:
   m_ObjectHideFlags: 0
@@ -2090,6 +2090,78 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1476568001}
   m_CullTransparentMesh: 1
+--- !u!1 &1520341732
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1520341734}
+  - component: {fileID: 1520341733}
+  - component: {fileID: 1520341735}
+  m_Layer: 0
+  m_Name: InventoryM
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1520341733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520341732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76b63bb3dc8198c4fb82d96eff399f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  inventoryUxml: {fileID: 9197481963319205126, guid: f324e9f5e5473f64199b6f879e2a9875, type: 3}
+  allPotions:
+  - {fileID: 11400000, guid: 95ab02fe07b283f4abe5ecfaedd794bc, type: 2}
+  potionElementTemplate: {fileID: 0}
+--- !u!4 &1520341734
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520341732}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 38.86007, y: -31.20023, z: 51.53797}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1520341735
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1520341732}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.UIElements.UIDocument
+  m_PanelSettings: {fileID: 11400000, guid: 870e0b6b91a2ebc4eab44b4f42c9d9e8, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 0}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 1
+  m_WorldSpaceWidth: 1920
+  m_WorldSpaceHeight: 1080
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
 --- !u!1 &1537500537
 GameObject:
   m_ObjectHideFlags: 0
@@ -2314,3 +2386,4 @@ SceneRoots:
   - {fileID: 714549493}
   - {fileID: 1537500540}
   - {fileID: 591697734}
+  - {fileID: 1520341734}

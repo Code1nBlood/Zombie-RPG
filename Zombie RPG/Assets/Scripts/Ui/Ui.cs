@@ -4,28 +4,51 @@ using UnityEngine.UIElements;
 
 public class Ui : MonoBehaviour
 {
+    [Header("UI Assets")]
     [SerializeField] private VisualTreeAsset mainMenuUxml;
-    [SerializeField] private VisualTreeAsset inventoryUxml;
     [SerializeField] private VisualTreeAsset contractsUxml;
     [SerializeField] private VisualTreeAsset contractCardUxml;
 
+    [Header("Dependencies")]
+    [SerializeField] private InventoryManager inventoryManager;
+
     private VisualElement mainMenu;
-    private VisualElement inventoryWindow;
-    private UIDocument uiDocument;
     private VisualElement contractsWindow;
-    private Button paidRefreshButton; 
+    private UIDocument uiDocument;
+    private Button paidRefreshButton;
 
     void OnEnable()
     {
         uiDocument = GetComponent<UIDocument>();
+        
+        // Subscribe to inventory events
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnInventoryClosed += ShowMainMenu;
+        }
+
+        ShowMainMenu();
+    }
+
+    void OnDisable()
+    {
+        if (inventoryManager != null)
+        {
+            inventoryManager.OnInventoryClosed -= ShowMainMenu;
+        }
+    }
+
+    private void ShowMainMenu()
+    {
         uiDocument.rootVisualElement.Clear();
 
-        // главное меню
         mainMenu = mainMenuUxml.Instantiate();
         uiDocument.rootVisualElement.Add(mainMenu);
 
+        // Setup main menu buttons
         var btnInventory = mainMenu.Q<Button>("btnInventory");
-        btnInventory.clicked += OpenInventory;
+        if (btnInventory != null)
+            btnInventory.clicked += OpenInventory;
 
         var btnContracts = mainMenu.Q<Button>("btnContracts");
         if (btnContracts != null)
@@ -38,24 +61,10 @@ public class Ui : MonoBehaviour
 
     private void OpenInventory()
     {
-        if (inventoryWindow == null)
+        if (inventoryManager != null)
         {
-            inventoryWindow = inventoryUxml.Instantiate();
-            inventoryWindow.style.flexGrow = 1;
-
-            var closeButton = inventoryWindow.Q<Button>("CloseButton");
-            if (closeButton != null)
-                closeButton.clicked += CloseInventory;
+            inventoryManager.OpenInventory();
         }
-
-        uiDocument.rootVisualElement.Clear();
-        uiDocument.rootVisualElement.Add(inventoryWindow);
-    }
-
-    private void CloseInventory()
-    {
-        uiDocument.rootVisualElement.Clear();
-        uiDocument.rootVisualElement.Add(mainMenu);
     }
 
     private void OpenScene1()
@@ -64,84 +73,76 @@ public class Ui : MonoBehaviour
     }
 
     private void OpenContracts()
-{
-    if (contractsWindow == null)
     {
-        contractsWindow = contractsUxml.Instantiate();
-        contractsWindow.style.flexGrow = 1;
+        if (contractsWindow == null)
+        {
+            contractsWindow = contractsUxml.Instantiate();
+            contractsWindow.style.flexGrow = 1;
 
-        var closeButton = contractsWindow.Q<Button>("closeButton");
-        if (closeButton != null)
-            closeButton.clicked += CloseContracts;
+            var closeButton = contractsWindow.Q<Button>("closeButton");
+            if (closeButton != null)
+                closeButton.clicked += CloseContracts;
 
-        // 🔥 Привязываем кнопку платного обновления
-        paidRefreshButton = contractsWindow.Q<Button>("paidRefreshButton");
-        if (paidRefreshButton != null)
-            paidRefreshButton.clicked += OnPaidRefreshClicked;
+            paidRefreshButton = contractsWindow.Q<Button>("paidRefreshButton");
+            if (paidRefreshButton != null)
+                paidRefreshButton.clicked += OnPaidRefreshClicked;
 
-        PopulateContractCards();
+            PopulateContractCards();
+        }
+
+        uiDocument.rootVisualElement.Clear();
+        uiDocument.rootVisualElement.Add(contractsWindow);
     }
-
-    uiDocument.rootVisualElement.Clear();
-    uiDocument.rootVisualElement.Add(contractsWindow);
-}
 
     private void CloseContracts()
     {
-        uiDocument.rootVisualElement.Clear();
-        uiDocument.rootVisualElement.Add(mainMenu);
+        ShowMainMenu();
     }
     
     private void OnPaidRefreshClicked()
-{
-    Debug.Log("Пользователь нажал 'Обновить за 100 контракт-койнов'");
-
-}
+    {
+        Debug.Log("Пользователь нажал 'Обновить за 100 контракт-койнов'");
+    }
 
     private void PopulateContractCards()
-{
-    var container = contractsWindow.Q<VisualElement>("contractsContainer");
-
-    container.Clear();
-
-    // данные контрактов 
-    var contracts = new[]
     {
-        new { Name = "Убить 10 зомби в голову", Desc = "Точность решает всё.", Reward = "Убийца", Cost = 50 },
-        new { Name = "Убить 3 зомби подряд без промаха", Desc = "Цепляй комбо!", Reward = "Стрелок", Cost = 80 },
-        new { Name = "Пережить 5 раз с HP ≤ 10", Desc = "На грани жизни и смерти.", Reward = "Выживальщик", Cost = 120 }
-    };
+        var container = contractsWindow.Q<VisualElement>("contractsContainer");
+        container.Clear();
 
-    foreach (var c in contracts)
-    {
-        // создание копии UI-элементов через Instantiate из VisualTreeAsset
-        var card = contractCardUxml.Instantiate();
-        
-        card.style.width = new StyleLength(250);
-        card.style.height = new StyleLength(400);
-        card.style.marginRight = new StyleLength(10); 
-        card.style.marginLeft = new StyleLength(10); 
-        
-        card.style.flexGrow = 0; 
-        card.style.flexShrink = 0; 
-
-        var nameLabel = card.Q<Label>("contractName");
-        var descLabel = card.Q<Label>("contractDescription");
-        var rewardLabel = card.Q<Label>("contractReward");
-        var buyButton = card.Q<Button>("buyButton");
-
-        nameLabel.text = c.Name;
-        descLabel.text = c.Desc;
-        rewardLabel.text = c.Reward;
-        buyButton.text = $"КУПИТЬ ЗА {c.Cost} КК";
-
-        buyButton.clicked += () =>
+        var contracts = new[]
         {
-            Debug.Log($"Покупка контракта: {c.Name}");
-            // Здесь — логика покупки (проверка КК, активация и т.д.)
+            new { Name = "Убить 10 зомби в голову", Desc = "Точность решает всё.", Reward = "Убийца", Cost = 50 },
+            new { Name = "Убить 3 зомби подряд без промаха", Desc = "Цепляй комбо!", Reward = "Стрелок", Cost = 80 },
+            new { Name = "Пережить 5 раз с HP ≤ 10", Desc = "На грани жизни и смерти.", Reward = "Выживальщик", Cost = 120 }
         };
 
-        container.Add(card);
+        foreach (var c in contracts)
+        {
+            var card = contractCardUxml.Instantiate();
+            
+            card.style.width = 250;
+            card.style.height = 400;
+            card.style.marginRight = 10;
+            card.style.marginLeft = 10;
+            card.style.flexGrow = 0;
+            card.style.flexShrink = 0;
+
+            var nameLabel = card.Q<Label>("contractName");
+            var descLabel = card.Q<Label>("contractDescription");
+            var rewardLabel = card.Q<Label>("contractReward");
+            var buyButton = card.Q<Button>("buyButton");
+
+            nameLabel.text = c.Name;
+            descLabel.text = c.Desc;
+            rewardLabel.text = c.Reward;
+            buyButton.text = $"КУПИТЬ ЗА {c.Cost} КК";
+
+            buyButton.clicked += () =>
+            {
+                Debug.Log($"Покупка контракта: {c.Name}");
+            };
+
+            container.Add(card);
+        }
     }
-}
 }
