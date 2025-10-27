@@ -2,36 +2,38 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Collections;
-
+using System.Linq;
 
 public class InventoryManager : MonoBehaviour
 {
     [Header("UI Assets")]
     [SerializeField] private VisualTreeAsset inventoryUxml;
-    
-    [Header("Potion Settings")]
+
+    [Header("Potions")]
     [SerializeField] private List<Potion> allPotions = new List<Potion>();
-    [SerializeField] private VisualTreeAsset potionElementTemplate;
+    private List<Potion> collectedPotions = new List<Potion>();
+    private ListView potionListView;
+    private VisualElement[] potionQuickSlots = new VisualElement[2];
+    private Potion[] potionSlotItems = new Potion[2];
+
+    [Header("Boosts")]
+    [SerializeField] private List<Boost> allBoosts = new List<Boost>();
+    private List<Boost> collectedBoosts = new List<Boost>();
+    private ListView boostListView;
+    private VisualElement[] boostQuickSlots = new VisualElement[3]; 
+    private Boost[] boostSlotItems = new Boost[3];
 
     private UIDocument uiDocument;
     private VisualElement inventoryWindow;
-    private List<Potion> collectedPotions = new List<Potion>();
-    private ListView potionListView;
-    private ListView boostListView;
 
-    // Drag & Drop system
     private VisualElement dragPreview;
-    private Potion draggedPotion;
-
+    private object draggedItem; 
     private bool isDragging = false;
-
-    // Quick slots
-    private VisualElement[] quickSlots = new VisualElement[2];
-    private Potion[] quickSlotPotions = new Potion[2];
 
     // Events
     public System.Action OnInventoryClosed { get; set; }
-    public System.Action<Potion, int> OnPotionAssignedToQuickSlot { get; set; }
+    public System.Action<Potion, int> OnPotionAssigned { get; set; }
+    public System.Action<Boost, int> OnBoostAssigned { get; set; }
 
     private void Awake()
     {
@@ -41,10 +43,7 @@ public class InventoryManager : MonoBehaviour
     public void OpenInventory()
     {
         if (inventoryWindow == null)
-        {
             CreateInventoryWindow();
-        }
-
         uiDocument.rootVisualElement.Clear();
         uiDocument.rootVisualElement.Add(inventoryWindow);
         RefreshInventoryDisplay();
@@ -55,7 +54,6 @@ public class InventoryManager : MonoBehaviour
         inventoryWindow = inventoryUxml.Instantiate();
         inventoryWindow.style.flexGrow = 1;
 
-        // Setup close button
         var closeButton = inventoryWindow.Q<Button>("CloseButton");
         if (closeButton != null)
             closeButton.clicked += CloseInventory;
@@ -67,18 +65,28 @@ public class InventoryManager : MonoBehaviour
 
     private void InitializeQuickSlots()
     {
-        var boostSlots = inventoryWindow.Query<VisualElement>(className: "potion-slot").ToList();
-        for (int i = 0; i < Mathf.Min(quickSlots.Length, boostSlots.Count); i++)
+        // Potion slots (2 шт)
+        var potionSlots = inventoryWindow.Query<VisualElement>(className: "potion-slot").ToList();
+        for (int i = 0; i < Mathf.Min(potionQuickSlots.Length, potionSlots.Count); i++)
         {
-            quickSlots[i] = boostSlots[i];
-            quickSlots[i].userData = i; // Store slot index
-            UpdateQuickSlotVisual(i);
+            potionQuickSlots[i] = potionSlots[i];
+            potionQuickSlots[i].userData = (object)i;
+            UpdatePotionSlotVisual(i);
+        }
+
+        // Boost slots (3 шт)
+        var boostSlots = inventoryWindow.Query<VisualElement>(className: "boost-slot").ToList();
+        for (int i = 0; i < Mathf.Min(boostQuickSlots.Length, boostSlots.Count); i++)
+        {
+            boostQuickSlots[i] = boostSlots[i];
+            boostQuickSlots[i].userData = (object)i;
+            UpdateBoostSlotVisual(i);
         }
     }
 
     private void InitializeInventoryLists()
     {
-        // Setup Potion ListView
+        // Potions
         potionListView = inventoryWindow.Q<ListView>("PotionList");
         if (potionListView != null)
         {
@@ -90,327 +98,354 @@ public class InventoryManager : MonoBehaviour
             potionListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
         }
 
-        // Setup Boost ListView
+        // Boosts
         boostListView = inventoryWindow.Q<ListView>("BoostList");
         if (boostListView != null)
         {
             boostListView.makeItem = MakeBoostItem;
             boostListView.bindItem = BindBoostItem;
-            boostListView.itemsSource = new List<object>();
+            boostListView.itemsSource = collectedBoosts;
+            boostListView.selectionType = SelectionType.None;
+            boostListView.fixedItemHeight = 80;
+            boostListView.virtualizationMethod = CollectionVirtualizationMethod.FixedHeight;
         }
 
-        StartCoroutine(AddTestPotions());
+        StartCoroutine(AddTestItems());
+    }
+
+    private IEnumerator AddTestItems()
+    {
+        yield return new WaitForEndOfFrame();
+        foreach (var p in allPotions) collectedPotions.Add(p);
+        foreach (var b in allBoosts) collectedBoosts.Add(b);
+        RefreshInventoryDisplay();
     }
 
     private void SetupDragAndDrop()
     {
-        // Register drag events on quick slots
-        foreach (var slot in quickSlots)
-        {
+        // Potion slots
+        foreach (var slot in potionQuickSlots)
             if (slot != null)
             {
-                slot.RegisterCallback<PointerDownEvent>(OnQuickSlotPointerDown);
-                slot.RegisterCallback<PointerUpEvent>(OnQuickSlotPointerUp);
+                slot.RegisterCallback<PointerDownEvent>(OnPotionSlotPointerDown);
+                slot.RegisterCallback<PointerUpEvent>(OnPotionSlotPointerUp);
             }
-        }
 
-        // Register global mouse events for drag handling
+        // Boost slots
+        foreach (var slot in boostQuickSlots)
+            if (slot != null)
+            {
+                slot.RegisterCallback<PointerDownEvent>(OnBoostSlotPointerDown);
+                slot.RegisterCallback<PointerUpEvent>(OnBoostSlotPointerUp);
+            }
+
         inventoryWindow.RegisterCallback<PointerMoveEvent>(OnPointerMove);
         inventoryWindow.RegisterCallback<PointerUpEvent>(OnPointerUpGlobal);
     }
 
-    private VisualElement MakePotionItem()
+    // === POTIONS ===
+    private VisualElement MakePotionItem() => CreateItemElement();
+    private void BindPotionItem(VisualElement el, int idx)
     {
-        var element = new VisualElement();
-        element.style.flexDirection = FlexDirection.Row;
-        element.style.alignItems = Align.Center;
-        element.style.paddingTop = 5;
-        element.style.paddingBottom = 5;
-        element.style.paddingLeft = 10;
-        element.style.paddingRight = 10;
-        return element;
+        var p = collectedPotions[idx];
+        BindItem(el, p.potionName, p.effect, p.duration, p.icon, p.color, p);
+        el.RegisterCallback<PointerDownEvent>(evt => StartDrag(evt, p, el));
     }
 
-    private void BindPotionItem(VisualElement element, int index)
+    // === BOOSTS ===
+    private VisualElement MakeBoostItem() => CreateItemElement();
+    private void BindBoostItem(VisualElement el, int idx)
     {
-        element.Clear();
-        
-        var potion = collectedPotions[index];
-        
-        // Icon with drag capability
-        var icon = new VisualElement();
-        icon.style.width = 40;
-        icon.style.height = 40;
-        icon.style.marginRight = 10;
-        icon.userData = potion; // Store potion reference
+        var b = collectedBoosts[idx];
+        BindItem(el, b.boostName, b.effect, b.duration, b.icon, b.color, b);
+        el.RegisterCallback<PointerDownEvent>(evt => StartDrag(evt, b, el));
+    }
 
-        if (potion.icon != null)
+    private VisualElement CreateItemElement()
+    {
+        var el = new VisualElement();
+        el.style.flexDirection = FlexDirection.Row;
+        el.style.alignItems = Align.Center;
+        el.style.paddingTop = 5;
+        el.style.paddingBottom = 5;
+        el.style.paddingLeft = 10;
+        el.style.paddingRight = 10;
+        return el;
+    }
+
+    private void BindItem(VisualElement el, string name, string effect, string duration, Sprite icon, Color color, object userData)
+    {
+        el.Clear();
+        el.userData = userData;
+
+        var iconEl = new VisualElement();
+        iconEl.style.width = 40;
+        iconEl.style.height = 40;
+        iconEl.style.marginRight = 10;
+        if (icon != null)
         {
-            icon.style.backgroundImage = new StyleBackground(potion.icon);
-            icon.style.backgroundColor = Color.clear; // чтобы не мешал цвет
+            iconEl.style.backgroundImage = new StyleBackground(icon);
+            iconEl.style.backgroundColor = Color.clear;
         }
         else
         {
-            icon.style.backgroundColor = potion.color;
+            iconEl.style.backgroundColor = color;
         }
-        
-        element.userData = potion; // храним данные на элементе
-        element.RegisterCallback<PointerDownEvent>(evt => StartDrag(evt, potion, element));
-        
-        element.Add(icon);
-        
-        // Info
-        var infoContainer = new VisualElement();
-        infoContainer.style.flexDirection = FlexDirection.Column;
-        
-        var nameLabel = new Label(potion.potionName);
-        nameLabel.style.fontSize = 14;
-        nameLabel.style.unityFontStyleAndWeight = FontStyle.Bold;
-        nameLabel.style.color = Color.white;
-        
-        var effectLabel = new Label(potion.effect);
-        effectLabel.style.fontSize = 11;
-        effectLabel.style.color = new Color(0.8f, 0.8f, 0.8f);
-        
-        var durationLabel = new Label($"Длительность: {potion.duration}");
-        durationLabel.style.fontSize = 10;
-        durationLabel.style.color = new Color(0.7f, 0.7f, 0.7f);
-        
-        infoContainer.Add(nameLabel);
-        infoContainer.Add(effectLabel);
-        infoContainer.Add(durationLabel);
-        element.Add(infoContainer);
+
+        var info = new VisualElement { style = { flexDirection = FlexDirection.Column } };
+        info.Add(new Label(name) { style = { fontSize = 14, unityFontStyleAndWeight = FontStyle.Bold, color = Color.white } });
+        info.Add(new Label(effect) { style = { fontSize = 11, color = new Color(0.8f, 0.8f, 0.8f) } });
+        info.Add(new Label($"Длительность: {duration}") { style = { fontSize = 10, color = new Color(0.7f, 0.7f, 0.7f) } });
+
+        el.Add(iconEl);
+        el.Add(info);
     }
 
-    private void StartDrag(PointerDownEvent evt, Potion potion, VisualElement sourceElement)
+    // === DRAG & DROP ===
+    private void StartDrag(PointerDownEvent evt, object item, VisualElement source)
     {
         if (isDragging) return;
-
         isDragging = true;
-        draggedPotion = potion;
+        draggedItem = item;
 
         dragPreview = new VisualElement();
         dragPreview.style.position = Position.Absolute;
         dragPreview.style.width = 50;
         dragPreview.style.height = 50;
-        dragPreview.style.backgroundColor = potion.color;
         dragPreview.style.opacity = 0.8f;
         dragPreview.pickingMode = PickingMode.Ignore;
 
-        // Set initial position
+        Color color = Color.white;
+        Sprite icon = null;
+
+        if (item is Potion p)
+        {
+            color = p.color;
+            icon = p.icon;
+        }
+        else if (item is Boost b)
+        {
+            color = b.color;
+            icon = b.icon;
+        }
+
+        if (icon != null)
+            dragPreview.style.backgroundImage = new StyleBackground(icon);
+        else
+            dragPreview.style.backgroundColor = color;
+
         UpdateDragPosition(evt.position);
         uiDocument.rootVisualElement.Add(dragPreview);
-
-        sourceElement.AddToClassList("dragging");
+        source.AddToClassList("dragging");
     }
 
     private void StopDrag()
     {
         if (!isDragging) return;
-
         isDragging = false;
-        
-        // Remove drag preview
         if (dragPreview != null)
         {
             uiDocument.rootVisualElement.Remove(dragPreview);
             dragPreview = null;
         }
-
-        // Remove dragging class from all elements
-        var draggingElements = inventoryWindow.Query<VisualElement>(className: "dragging").ToList();
-        foreach (var element in draggingElements)
-        {
-            element.RemoveFromClassList("dragging");
-        }
-
-        draggedPotion = null;
+        foreach (var el in inventoryWindow.Query<VisualElement>(className: "dragging").ToList())
+            el.RemoveFromClassList("dragging");
+        draggedItem = null;
     }
 
     private void OnPointerMove(PointerMoveEvent evt)
     {
-        if (!isDragging || dragPreview == null) return;
-
-        UpdateDragPosition(evt.position);
+        if (isDragging && dragPreview != null)
+            UpdateDragPosition(evt.position);
     }
 
     private void OnPointerUpGlobal(PointerUpEvent evt)
     {
         if (!isDragging) return;
 
-        // Check if dropped on a quick slot
-        var quickSlot = GetQuickSlotAtPosition(evt.position);
-        if (quickSlot != null && draggedPotion != null)
+        // Проверяем, куда сбросили
+        if (draggedItem is Potion p)
         {
-            int slotIndex = (int)quickSlot.userData;
-            AssignPotionToQuickSlot(draggedPotion, slotIndex);
+            var slot = GetPotionSlotAt(evt.position);
+            if (slot != null)
+            {
+                int idx = (int)slot.userData;
+                AssignPotionToSlot(p, idx);
+            }
+        }
+        else if (draggedItem is Boost b)
+        {
+            var slot = GetBoostSlotAt(evt.position);
+            if (slot != null)
+            {
+                int idx = (int)slot.userData;
+                AssignBoostToSlot(b, idx);
+            }
         }
 
         StopDrag();
     }
 
-    private void OnQuickSlotPointerDown(PointerDownEvent evt)
-{
-    var slot = evt.currentTarget as VisualElement;
-    int slotIndex = (int)slot.userData;
-    if (quickSlotPotions[slotIndex] != null)
+    // === POTION SLOTS ===
+    private void OnPotionSlotPointerDown(PointerDownEvent evt)
     {
-        var potion = quickSlotPotions[slotIndex];
-        collectedPotions.Add(potion);
-        RefreshInventoryDisplay();
-
-        quickSlotPotions[slotIndex] = null;
-        UpdateQuickSlotVisual(slotIndex);
-
-        StartDrag(evt, potion, slot);
-    }
-}
-
-    private void OnQuickSlotPointerUp(PointerUpEvent evt)
-    {
-        if (!isDragging) return;
-
         var slot = evt.currentTarget as VisualElement;
-        int slotIndex = (int)slot.userData;
-        
-        if (draggedPotion != null)
+        int idx = (int)slot.userData;
+        if (potionSlotItems[idx] != null)
         {
-            AssignPotionToQuickSlot(draggedPotion, slotIndex);
+            var p = potionSlotItems[idx];
+            collectedPotions.Add(p);
+            RefreshInventoryDisplay();
+            potionSlotItems[idx] = null;
+            UpdatePotionSlotVisual(idx);
+            StartDrag(evt, p, slot);
         }
+    }
 
+    private void OnPotionSlotPointerUp(PointerUpEvent evt)
+    {
+        if (!isDragging || draggedItem is not Potion p) return;
+        int idx = (int)(evt.currentTarget as VisualElement).userData;
+        AssignPotionToSlot(p, idx);
         StopDrag();
     }
 
-    private VisualElement GetQuickSlotAtPosition(Vector2 position)
+    private VisualElement GetPotionSlotAt(Vector2 pos)
     {
-        foreach (var slot in quickSlots)
-        {
-            if (slot != null && slot.worldBound.Contains(position))
+        return potionQuickSlots.FirstOrDefault(s => s != null && s.worldBound.Contains(pos));
+    }
+
+    private void AssignPotionToSlot(Potion p, int idx)
+    {
+        if (idx < 0 || idx >= potionSlotItems.Length) return;
+
+        // Убираем из других слотов
+        for (int i = 0; i < potionSlotItems.Length; i++)
+            if (potionSlotItems[i] == p)
             {
-                return slot;
+                potionSlotItems[i] = null;
+                UpdatePotionSlotVisual(i);
             }
-        }
-        return null;
+
+        // Убираем из инвентаря
+        if (collectedPotions.Remove(p))
+            RefreshInventoryDisplay();
+
+        potionSlotItems[idx] = p;
+        UpdatePotionSlotVisual(idx);
+        OnPotionAssigned?.Invoke(p, idx);
     }
 
-    private void UpdateDragPosition(Vector2 position)
+    private void UpdatePotionSlotVisual(int idx)
     {
-        if (dragPreview != null)
-        {
-            dragPreview.style.left = position.x - 25;
-            dragPreview.style.top = position.y - 25;
-        }
-    }
-
-    private void AssignPotionToQuickSlot(Potion potion, int slotIndex)
-{
-    if (slotIndex < 0 || slotIndex >= quickSlotPotions.Length) return;
-
-    for (int i = 0; i < quickSlotPotions.Length; i++)
-    {
-        if (quickSlotPotions[i] == potion)
-        {
-            quickSlotPotions[i] = null;
-            UpdateQuickSlotVisual(i);
-        }
-    }
-
-    if (collectedPotions.Contains(potion))
-    {
-        collectedPotions.Remove(potion);
-        RefreshInventoryDisplay();
-    }
-
-    quickSlotPotions[slotIndex] = potion;
-    UpdateQuickSlotVisual(slotIndex);
-    OnPotionAssignedToQuickSlot?.Invoke(potion, slotIndex);
-    Debug.Log($"Зелье {potion.potionName} назначено на слот {slotIndex + 1}");
-}
-
-    private void UpdateQuickSlotVisual(int slotIndex)
-    {
-        if (slotIndex < 0 || slotIndex >= quickSlots.Length || quickSlots[slotIndex] == null) return;
-
-        var slot = quickSlots[slotIndex];
+        if (idx < 0 || idx >= potionQuickSlots.Length || potionQuickSlots[idx] == null) return;
+        var slot = potionQuickSlots[idx];
         slot.Clear();
-
-        var potion = quickSlotPotions[slotIndex];
-        if (potion != null)
+        var p = potionSlotItems[idx];
+        if (p != null)
         {
-            var icon = new VisualElement();
-            icon.style.width = slot.contentRect.width;
-            icon.style.height = slot.contentRect.height;
-            icon.style.backgroundColor = potion.color;
-            
-            if (potion.icon != null)
-            {
-                icon.style.backgroundImage = new StyleBackground(potion.icon);
-            }
-            
-            var nameLabel = new Label(potion.potionName);
-            nameLabel.style.fontSize = 8;
-            nameLabel.style.unityTextAlign = TextAnchor.LowerCenter;
-            nameLabel.style.color = Color.white;
-            nameLabel.style.position = Position.Absolute;
-            nameLabel.style.bottom = 0;
-            nameLabel.style.width = Length.Percent(100);
-            nameLabel.style.backgroundColor = new Color(0, 0, 0, 0.7f);
-            
-            icon.Add(nameLabel);
+            var icon = CreateSlotIcon(p.icon, p.color, p.potionName);
             slot.Add(icon);
         }
         else
         {
-            // Empty slot visual
-            var placeholder = new Label($"Слот {slotIndex + 1}");
-            placeholder.style.unityTextAlign = TextAnchor.MiddleCenter;
-            placeholder.style.color = new Color(1, 1, 1, 0.5f);
-            slot.Add(placeholder);
+            slot.Add(new Label($"Слот {idx + 1}") { style = { unityTextAlign = TextAnchor.MiddleCenter, color = new Color(1,1,1,0.5f) } });
         }
     }
 
-    private VisualElement MakeBoostItem()
+    // === BOOST SLOTS ===
+    private void OnBoostSlotPointerDown(PointerDownEvent evt)
     {
-        return new VisualElement();
-    }
-
-    private void BindBoostItem(VisualElement element, int index)
-    {
-        // Implementation for boosts
-    }
-
-    public void AddPotion(Potion potion)
-    {
-        collectedPotions.Add(potion);
-        RefreshInventoryDisplay();
-    }
-
-    public Potion GetPotionInQuickSlot(int slotIndex)
-    {
-        if (slotIndex >= 0 && slotIndex < quickSlotPotions.Length)
+        var slot = evt.currentTarget as VisualElement;
+        int idx = (int)slot.userData;
+        if (boostSlotItems[idx] != null)
         {
-            return quickSlotPotions[slotIndex];
+            var b = boostSlotItems[idx];
+            collectedBoosts.Add(b);
+            RefreshInventoryDisplay();
+            boostSlotItems[idx] = null;
+            UpdateBoostSlotVisual(idx);
+            StartDrag(evt, b, slot);
         }
-        return null;
     }
 
-    public void UsePotionFromQuickSlot(int slotIndex)
+    private void OnBoostSlotPointerUp(PointerUpEvent evt)
     {
-        var potion = GetPotionInQuickSlot(slotIndex);
-        if (potion != null)
-        {
-            // Apply effect
-            var effectApplier = Object.FindAnyObjectByType<PotionEffectApplier>();
-            if (effectApplier != null)
+        if (!isDragging || draggedItem is not Boost b) return;
+        int idx = (int)(evt.currentTarget as VisualElement).userData;
+        AssignBoostToSlot(b, idx);
+        StopDrag();
+    }
+
+    private VisualElement GetBoostSlotAt(Vector2 pos)
+    {
+        return boostQuickSlots.FirstOrDefault(s => s != null && s.worldBound.Contains(pos));
+    }
+
+    private void AssignBoostToSlot(Boost b, int idx)
+    {
+        if (idx < 0 || idx >= boostSlotItems.Length) return;
+
+        for (int i = 0; i < boostSlotItems.Length; i++)
+            if (boostSlotItems[i] == b)
             {
-                effectApplier.ApplyPotionEffect(potion);
+                boostSlotItems[i] = null;
+                UpdateBoostSlotVisual(i);
             }
-            
-            // Remove from quick slot
-            quickSlotPotions[slotIndex] = null;
-            UpdateQuickSlotVisual(slotIndex);
-            
-            Debug.Log($"Использовано зелье: {potion.potionName} из слота {slotIndex + 1}");
+
+        if (collectedBoosts.Remove(b))
+            RefreshInventoryDisplay();
+
+        boostSlotItems[idx] = b;
+        UpdateBoostSlotVisual(idx);
+        OnBoostAssigned?.Invoke(b, idx);
+    }
+
+    private void UpdateBoostSlotVisual(int idx)
+    {
+        if (idx < 0 || idx >= boostQuickSlots.Length || boostQuickSlots[idx] == null) return;
+        var slot = boostQuickSlots[idx];
+        slot.Clear();
+        var b = boostSlotItems[idx];
+        if (b != null)
+        {
+            var icon = CreateSlotIcon(b.icon, b.color, b.boostName);
+            slot.Add(icon);
+        }
+        else
+        {
+            slot.Add(new Label($"Слот {idx + 1}") { style = { unityTextAlign = TextAnchor.MiddleCenter, color = new Color(1,1,1,0.5f) } });
+        }
+    }
+
+    private VisualElement CreateSlotIcon(Sprite icon, Color color, string name)
+    {
+        var iconEl = new VisualElement();
+        iconEl.style.width = Length.Percent(100);
+        iconEl.style.height = Length.Percent(100);
+        if (icon != null)
+            iconEl.style.backgroundImage = new StyleBackground(icon);
+        else
+            iconEl.style.backgroundColor = color;
+
+        var label = new Label(name);
+        label.style.fontSize = 8;
+        label.style.unityTextAlign = TextAnchor.LowerCenter;
+        label.style.color = Color.white;
+        label.style.position = Position.Absolute;
+        label.style.bottom = 0;
+        label.style.width = Length.Percent(100);
+        label.style.backgroundColor = new Color(0, 0, 0, 0.7f);
+        iconEl.Add(label);
+        return iconEl;
+    }
+
+    private void UpdateDragPosition(Vector2 pos)
+    {
+        if (dragPreview != null)
+        {
+            dragPreview.style.left = pos.x - 25;
+            dragPreview.style.top = pos.y - 25;
         }
     }
 
@@ -420,20 +455,9 @@ public class InventoryManager : MonoBehaviour
         boostListView?.Rebuild();
     }
 
-    private IEnumerator AddTestPotions()
-    {
-        yield return new WaitForEndOfFrame();
-        
-        foreach (var potion in allPotions)
-        {
-            AddPotion(potion);
-            yield return new WaitForSeconds(0.3f);
-        }
-    }
-
     private void CloseInventory()
     {
-        StopDrag(); // Clean up any ongoing drag
+        StopDrag();
         uiDocument.rootVisualElement.Clear();
         OnInventoryClosed?.Invoke();
     }

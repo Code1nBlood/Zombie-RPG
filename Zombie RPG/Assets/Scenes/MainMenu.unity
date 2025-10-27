@@ -2123,7 +2123,10 @@ MonoBehaviour:
   inventoryUxml: {fileID: 9197481963319205126, guid: f324e9f5e5473f64199b6f879e2a9875, type: 3}
   allPotions:
   - {fileID: 11400000, guid: 95ab02fe07b283f4abe5ecfaedd794bc, type: 2}
-  potionElementTemplate: {fileID: 0}
+  allBoosts:
+  - {fileID: 11400000, guid: 395528e54d3ecd744b00626d64424c81, type: 2}
+  - {fileID: 11400000, guid: bc685eed0e835654ea34ce2179b922a7, type: 2}
+  - {fileID: 11400000, guid: 4718ab0738ac81345883e7d879ac0fec, type: 2}
 --- !u!4 &1520341734
 Transform:
   m_ObjectHideFlags: 0
