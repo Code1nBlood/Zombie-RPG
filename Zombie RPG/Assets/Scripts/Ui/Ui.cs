@@ -111,21 +111,14 @@ public class Ui : MonoBehaviour
 
         var contracts = new[]
         {
-            new { Name = "Убить 10 зомби в голову", Desc = "Точность решает всё.", Reward = "Убийца", Cost = 50 },
-            new { Name = "Убить 3 зомби подряд без промаха", Desc = "Цепляй комбо!", Reward = "Стрелок", Cost = 80 },
-            new { Name = "Пережить 5 раз с HP ≤ 10", Desc = "На грани жизни и смерти.", Reward = "Выживальщик", Cost = 120 }
+            new { Name = "Точность решает всё", Desc = "Убить 10 зомби в голову", Reward = "Убийца", Cost = 50 },
+            new { Name = "Цепляй комбо!", Desc = "Убить 3 зомби подряд без промаха", Reward = "Стрелок", Cost = 80 },
+            new { Name = "На грани жизни и смерти.", Desc = "Пережить 5 раз с HP ≤ 10", Reward = "Выживальщик", Cost = 120 }
         };
 
         foreach (var c in contracts)
         {
             var card = contractCardUxml.Instantiate();
-            
-            card.style.width = 250;
-            card.style.height = 400;
-            card.style.marginRight = 10;
-            card.style.marginLeft = 10;
-            card.style.flexGrow = 0;
-            card.style.flexShrink = 0;
 
             var nameLabel = card.Q<Label>("contractName");
             var descLabel = card.Q<Label>("contractDescription");

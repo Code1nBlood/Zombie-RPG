@@ -319,6 +319,11 @@ public class InventoryManager : MonoBehaviour
     {
         if (idx < 0 || idx >= potionSlotItems.Length) return;
 
+        if (potionSlotItems[idx] != null && potionSlotItems[idx] != p)
+        {
+            collectedPotions.Add(potionSlotItems[idx]);
+        }
+
         // Убираем из других слотов
         for (int i = 0; i < potionSlotItems.Length; i++)
             if (potionSlotItems[i] == p)
@@ -334,6 +339,7 @@ public class InventoryManager : MonoBehaviour
         potionSlotItems[idx] = p;
         UpdatePotionSlotVisual(idx);
         OnPotionAssigned?.Invoke(p, idx);
+        RefreshInventoryDisplay();
     }
 
     private void UpdatePotionSlotVisual(int idx)
@@ -386,6 +392,11 @@ public class InventoryManager : MonoBehaviour
     {
         if (idx < 0 || idx >= boostSlotItems.Length) return;
 
+        if (boostSlotItems[idx] != null && boostSlotItems[idx] != b)
+        {
+            collectedBoosts.Add(boostSlotItems[idx]);
+        }
+
         for (int i = 0; i < boostSlotItems.Length; i++)
             if (boostSlotItems[i] == b)
             {
@@ -399,6 +410,7 @@ public class InventoryManager : MonoBehaviour
         boostSlotItems[idx] = b;
         UpdateBoostSlotVisual(idx);
         OnBoostAssigned?.Invoke(b, idx);
+        RefreshInventoryDisplay();
     }
 
     private void UpdateBoostSlotVisual(int idx)
