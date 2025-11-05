@@ -6,6 +6,8 @@ using System.Linq;
 
 public class InventoryManager : MonoBehaviour
 {
+    public static InventoryManager Instance { get; private set; }
+
     [Header("UI Assets")]
     [SerializeField] private VisualTreeAsset inventoryUxml;
 
@@ -35,8 +37,50 @@ public class InventoryManager : MonoBehaviour
     public System.Action<Potion, int> OnPotionAssigned { get; set; }
     public System.Action<Boost, int> OnBoostAssigned { get; set; }
 
+    public Potion GetPotionInSlot(int index)
+    {
+        if (index >= 0 && index < potionSlotItems.Length)
+        {
+            return potionSlotItems[index];
+        }
+        return null;
+    }
+
+    public void UsePotionFromSlot(int index)
+{
+    Potion potion = GetPotionInSlot(index);
+
+    if (potion != null)
+    {
+        PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
+        if (player != null)
+        {
+            player.UseHealthPotion();
+        }
+
+        potionSlotItems[index] = null;
+        
+        UpdatePotionSlotVisual(index); 
+        
+        OnPotionAssigned?.Invoke(null, index); 
+        
+    }
+}
+    public Potion[] GetAssignedPotions()
+    {
+        return potionSlotItems; 
+    }
+
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(this.gameObject);
         uiDocument = GetComponent<UIDocument>();
     }
 
@@ -460,6 +504,8 @@ public class InventoryManager : MonoBehaviour
             dragPreview.style.top = pos.y - 25;
         }
     }
+
+    
 
     private void RefreshInventoryDisplay()
     {

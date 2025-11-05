@@ -12,6 +12,14 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundMask;
     public float jumpHeight = 3f;
 
+    [Header("Health")]
+    public float maxHealth = 100f; // Максимальное здоровье
+    public float healthRegenRate = 0.5f; // Базовая скорость регенерации HP в секунду
+    
+    private float currentHealth;
+    private float healthRegenModifier = 1f; // Множитель для бустов регенерации HP
+    private float maxHealthModifier = 1f; // Множитель для бустов максимального HP
+
     [Header("Stamina")]
     public float maxStamina = 100f;
     public float staminaDrainRate = 25f; // Скорость расхода стамины при беге
@@ -19,9 +27,9 @@ public class PlayerMovement : MonoBehaviour
     public float minStaminaToSprint = 10f; // Минимальное количество стамины для бега
 
     [Header("Rolling")]
-    public float rollDuration = 0.8f; // Продолжительность подката
-    public float rollSpeed = 15f;     // Скорость подката
-    public float rollCooldown = 2f;   // Время перезарядки подката
+    public float rollDuration = 0.8f; // Продолжительность деша
+    public float rollSpeed = 15f;     // Скорость деша
+    public float rollCooldown = 2f;   // Время перезарядки деша
 
     private float currentStamina;
     private bool isSprinting = false;
@@ -35,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         currentStamina = maxStamina;
+        currentHealth = maxHealth;
     }
 
     void Update()
@@ -50,6 +59,8 @@ public class PlayerMovement : MonoBehaviour
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
+
+        RegenerateHealth();
 
         isSprinting = false;
         float currentSpeed = speed;
@@ -85,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        // Управление кулдауном подката
+        // Управление кулдауном деша
         if (!canRoll)
         {
             rollTimer += Time.deltaTime;
@@ -109,13 +120,13 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(velocity * Time.deltaTime);
     }
 
-    IEnumerator Roll() 
+    IEnumerator Roll()
     {
         isRolling = true;
-        canRoll = false; 
+        canRoll = false;
 
-        // Направление подката 
-        Vector3 rollDirection = transform.forward; 
+        // Направление деша 
+        Vector3 rollDirection = transform.forward;
         float horizontalInput = Input.GetAxisRaw("Horizontal");
         float verticalInput = Input.GetAxisRaw("Vertical");
 
@@ -123,7 +134,7 @@ public class PlayerMovement : MonoBehaviour
         {
             rollDirection = verticalInput > 0 ? transform.forward : -transform.forward;
         }
-        else if (Mathf.Abs(horizontalInput) > 0.1f) 
+        else if (Mathf.Abs(horizontalInput) > 0.1f)
         {
             rollDirection = horizontalInput > 0 ? transform.right : -transform.right;
         }
@@ -137,10 +148,47 @@ public class PlayerMovement : MonoBehaviour
             controller.Move(rollMove);
 
             elapsed += Time.deltaTime;
-            yield return null; 
+            yield return null;
         }
 
-        isRolling = false; 
+        isRolling = false;
+    }
+
+    private void RegenerateHealth()
+    {
+        // Регенерация HP
+        if (currentHealth < maxHealth * maxHealthModifier)
+        {
+            // Регенерация = Базовая ставка * Множитель регенерации * Время
+            currentHealth += healthRegenRate * healthRegenModifier * Time.deltaTime;
+
+            // Ограничение, чтобы не превысить модифицированный максимум
+            if (currentHealth > maxHealth * maxHealthModifier)
+            {
+                currentHealth = maxHealth * maxHealthModifier;
+            }
+        }
+    }
+
+    public void ApplyHealthBoost()
+    {
+        //Увеличение регенерации HP на 10% (множитель становится 1.1)
+        healthRegenModifier += 0.1f;
+
+        // 2. Увеличение максимального HP на 30
+        maxHealth += 30f;
+    }
+    
+    public void UseHealthPotion()
+    {
+        float healAmount = (maxHealth * maxHealthModifier) * 0.5f; 
+        
+        currentHealth += healAmount;
+        
+        if (currentHealth > maxHealth * maxHealthModifier) 
+        {
+            currentHealth = maxHealth * maxHealthModifier;
+        }
     }
 
 
@@ -148,6 +196,27 @@ public class PlayerMovement : MonoBehaviour
     public float GetStaminaNormalized()
     {
         return currentStamina / maxStamina;
+    }
+
+    public float GetHealthNormalized()
+    {
+        return currentHealth / (maxHealth * maxHealthModifier);
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            Die(); 
+        }
+    }
+    private void Die()
+    {
+        Debug.Log("Игрок мертв!");
+        // логика проигрыша: экран смерти
+
     }
 
 }

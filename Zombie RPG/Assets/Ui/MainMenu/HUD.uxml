@@ -1,0 +1,27 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Ui/HUDuss.uss?fileID=7433441132597879392&amp;guid=0295ac2826a377f4da43fe54c6ea94b6&amp;type=3#HUDuss" />
+
+    <ui:VisualElement name="HUD_Root" class="hud-root">
+        
+        <ui:VisualElement name="Crosshair" class="crosshair" />
+
+        <ui:VisualElement name="StatsPanel" class="stats-panel">
+            <ui:VisualElement name="HealthBarContainer" class="stat-bar-container health-color">
+                <ui:VisualElement name="HealthBar" class="stat-bar-fill" />
+            </ui:VisualElement>
+            <ui:VisualElement name="StaminaBarContainer" class="stat-bar-container stamina-color">
+                <ui:VisualElement name="StaminaBar" class="stat-bar-fill" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <ui:VisualElement name="Hotbar" class="hotbar">
+            <ui:VisualElement name="Slot1" class="hotbar-slot" />
+            <ui:VisualElement name="Slot2" class="hotbar-slot" />
+            <ui:VisualElement name="Slot3" class="hotbar-slot" />
+            <ui:VisualElement name="Slot4" class="hotbar-slot" />
+            <ui:VisualElement name="Slot5" class="hotbar-slot" />
+        </ui:VisualElement>
+        
+    </ui:VisualElement>
+
+</ui:UXML>

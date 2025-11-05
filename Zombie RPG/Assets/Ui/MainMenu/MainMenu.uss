@@ -1,5 +1,10 @@
 :root {
+  flex-grow: 1;
+}
 
+.main-menu-container { 
+    flex-grow: 1; 
+    background-color: rgb(132, 118, 118);
 }
 
 #Root > .unity-button {
