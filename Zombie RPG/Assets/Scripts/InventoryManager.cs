@@ -22,8 +22,9 @@ public class InventoryManager : MonoBehaviour
     [SerializeField] private List<Boost> allBoosts = new List<Boost>();
     private List<Boost> collectedBoosts = new List<Boost>();
     private ListView boostListView;
-    private VisualElement[] boostQuickSlots = new VisualElement[3]; 
+    private VisualElement[] boostQuickSlots = new VisualElement[3];
     private Boost[] boostSlotItems = new Boost[3];
+    private int[] boostMatchesRemaining = new int[3];
 
     private UIDocument uiDocument;
     private VisualElement inventoryWindow;
@@ -452,9 +453,26 @@ public class InventoryManager : MonoBehaviour
             RefreshInventoryDisplay();
 
         boostSlotItems[idx] = b;
+
+        boostMatchesRemaining[idx] = 3;
+
         UpdateBoostSlotVisual(idx);
         OnBoostAssigned?.Invoke(b, idx);
         RefreshInventoryDisplay();
+    }
+
+    public Boost[] GetAssignedBoosts()
+    {
+        return boostSlotItems;
+    }
+
+    public int GetBoostMatchesRemaining(int index)
+    {
+        if (index >= 0 && index < boostMatchesRemaining.Length)
+        {
+            return boostMatchesRemaining[index];
+        }
+        return 0;
     }
 
     private void UpdateBoostSlotVisual(int idx)

@@ -3,6 +3,7 @@
 
     <ui:VisualElement name="HUD_Root" class="hud-root">
         
+        <ui:VisualElement name="BoostsPanel" class="boosts-panel"></ui:VisualElement>
         <ui:VisualElement name="Crosshair" class="crosshair" />
 
         <ui:VisualElement name="StatsPanel" class="stats-panel">

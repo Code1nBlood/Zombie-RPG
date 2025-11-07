@@ -75,3 +75,44 @@
     border-radius: 5px;
 }
 
+
+
+
+
+/*Панель активных бустов*/
+.boosts-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    flex-direction: row; 
+    align-items: flex-end; 
+}
+
+.active-boost-container {
+    width: 100px; 
+    height: 80px; 
+    margin-left: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.boost-icon {
+    width: 60px;
+    height: 60px;
+    border-width: 2px;
+    border-color: #0ff; 
+    border-radius: 4px;
+    background-color: rgba(30, 30, 30, 0.7);
+}
+
+.boost-duration-label {
+    font-size: 10px;
+    color: #fff;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    height: 20px; 
+    width: 100%;
+    margin-top: 2px;
+    background-color: rgba(0, 0, 0, 0.5); 
+}
+

@@ -10,6 +10,7 @@ public class HUDController : MonoBehaviour
 
     private VisualElement healthBar;
     private VisualElement staminaBar;
+    private VisualElement boostsPanel;
 
     private readonly VisualElement[] hotbarSlots = new VisualElement[5];
     private readonly VisualElement[] potionSlotsUI = new VisualElement[2];
@@ -21,19 +22,23 @@ public class HUDController : MonoBehaviour
         VisualElement root = document.rootVisualElement;
         healthBar = root.Q<VisualElement>("HealthBar");
         staminaBar = root.Q<VisualElement>("StaminaBar");
+        boostsPanel = root.Q<VisualElement>("BoostsPanel");
 
         InitializeHotbar(root);
 
         if (InventoryManager.Instance != null) 
         {
             // Проверяем, есть ли уже назначенные зелья 
-            Potion[] assignedPotions = InventoryManager.Instance.GetAssignedPotions(); 
+            Potion[] assignedPotions = InventoryManager.Instance.GetAssignedPotions();
             for (int i = 0; i < assignedPotions.Length; i++)
             {
                 // Если assignedPotions[i] == null, вызывается логика пустого слота (с номером).
-                OnPotionAssignedToSlot(assignedPotions[i], i); 
+                OnPotionAssignedToSlot(assignedPotions[i], i);
             }
+            UpdateBoostsDisplay();
+
             InventoryManager.Instance.OnPotionAssigned += OnPotionAssignedToSlot;
+            InventoryManager.Instance.OnBoostAssigned += OnBoostAssignedToSlot;
         }
         else
         {
@@ -93,8 +98,6 @@ public class HUDController : MonoBehaviour
         {
             UsePotionInHotbarSlot(1);
         }
-        
-        // Клавиши 3, 4, 5 пока не используются для зелий
     }
 
     private void UsePotionInHotbarSlot(int slotIndex)
@@ -106,7 +109,7 @@ public class HUDController : MonoBehaviour
     }
 
     // --- ОБРАБОТКА СОБЫТИЙ ---
-    
+
     // Вызывается, когда зелье назначено/удалено в InventoryManager
     private void OnPotionAssignedToSlot(Potion potion, int index)
     {
@@ -115,101 +118,140 @@ public class HUDController : MonoBehaviour
             UpdateSlotVisual(potionSlotsUI[index], potion);
         }
     }
+    
+    private void OnBoostAssignedToSlot(Boost boost, int index)
+    {
+        UpdateBoostsDisplay();
+    }
 
     // --- ВИЗУАЛЬНОЕ ОБНОВЛЕНИЕ ---
 
     private void UpdateSlotVisual(VisualElement slotElement, Potion potion)
-{
-    if (slotElement == null) return;
-    
-    // Очищаем предыдущее содержимое и сбрасываем фон
-    slotElement.Clear(); 
-    slotElement.style.backgroundImage = new StyleBackground((Texture2D)null);
-    
-    // --- DEBUG LOG 1: Проверка наличия предмета ---
-    Debug.Log($"[HUD Debug 1/4] Обновление слота {slotElement.name}. Зелье: {(potion != null ? potion.potionName : "NULL (Пустой Слот)")}");
-
-    if (potion != null)
     {
-        // 1. Проверяем наличие Sprite
-        if (potion.icon != null)
-        {
-            // --- DEBUG LOG 2: Спрайт найден ---
-            Debug.Log($"[HUD Debug 2/4] Зелье: {potion.potionName}. Спрайт найден: {potion.icon.name}.");
+        if (slotElement == null) return;
 
-            // Проверка: Спрайт должен иметь рабочую текстуру
-            if (potion.icon.texture != null)
+        slotElement.Clear();
+        slotElement.style.backgroundImage = new StyleBackground((Texture2D)null);
+
+        // --- DEBUG LOG 1: Проверка наличия предмета ---
+        Debug.Log($"[HUD Debug 1/4] Обновление слота {slotElement.name}. Зелье: {(potion != null ? potion.potionName : "NULL (Пустой Слот)")}");
+
+        if (potion != null)
+        {
+            if (potion.icon != null)
             {
-                // --- DEBUG LOG 3: Текстура рабочая ---
-                Debug.Log($"[HUD Debug 3/4] Текстура спрайта рабочая. Попытка установки фона.");
-                
-                // Установка Sprite как фона
-                slotElement.style.backgroundImage = new StyleBackground(potion.icon);
-                slotElement.style.backgroundColor = Color.clear;
-                
-                // --- DEBUG LOG 4: ЗАКЛЮЧИТЕЛЬНАЯ ПРОВЕРКА ---
-                // Проверяем, удалось ли UI Toolkit применить фон.
-                if (slotElement.resolvedStyle.backgroundImage.sprite != null)
+
+                if (potion.icon.texture != null)
                 {
-                     Debug.Log($"[HUD Debug SUCCESS] Иконка УСПЕШНО установлена на {slotElement.name}.");
+
+                    slotElement.style.backgroundImage = new StyleBackground(potion.icon);
+                    slotElement.style.backgroundColor = Color.clear;
+
+                    if (slotElement.resolvedStyle.backgroundImage.sprite != null)
+                    {
+                        Debug.Log($"[HUD Debug SUCCESS] Иконка УСПЕШНО установлена на {slotElement.name}.");
+                    }
+                    else
+                    {
+                        Debug.LogError($"[HUD Debug FAIL] Иконка не отобразилась, хотя все данные верны. Конфликты.");
+                    }
+
                 }
                 else
                 {
-                     // Это срабатывает, если все данные есть, но UI Toolkit отказывается рисовать.
-                     Debug.LogError($"[HUD Debug FAIL] Иконка не отобразилась, хотя все данные верны. ВЕРСИЯ UNITY или CSS конфликты.");
+                    // --- DEBUG LOG ОШИБКА ИМПОРТА ---
+                    Debug.LogError($"[HUD Debug ОШИБКА ИМПОРТА] Зелье: {potion.potionName} имеет ссылку на Sprite, НО его базовая текстура равна NULL. **ПРОВЕРЬТЕ НАСТРОЙКИ ТЕКСТУРЫ** (Texture Type должен быть Sprite (2D and UI)).");
+                    slotElement.style.backgroundColor = potion.color;
                 }
-
             }
             else
             {
-                // --- DEBUG LOG ОШИБКА ИМПОРТА ---
-                Debug.LogError($"[HUD Debug ОШИБКА ИМПОРТА] Зелье: {potion.potionName} имеет ссылку на Sprite, НО его базовая текстура равна NULL. **ПРОВЕРЬТЕ НАСТРОЙКИ ТЕКСТУРЫ** (Texture Type должен быть Sprite (2D and UI)).");
+                // --- DEBUG LOG 4: Ссылка на Иконку NULL ---
+                Debug.LogWarning($"[HUD Debug ПРЕДУПРЕЖДЕНИЕ] Зелье: {potion.potionName} в слоте, но поле 'icon' в ScriptableObject ПУСТОЕ (NULL).");
+                // Запасной вариант: цвет
                 slotElement.style.backgroundColor = potion.color;
             }
         }
         else
         {
-            // --- DEBUG LOG 4: Ссылка на Иконку NULL ---
-            Debug.LogWarning($"[HUD Debug ПРЕДУПРЕЖДЕНИЕ] Зелье: {potion.potionName} в слоте, но поле 'icon' в ScriptableObject ПУСТОЕ (NULL).");
-            // Запасной вариант: цвет
-            slotElement.style.backgroundColor = potion.color;
+
+            slotElement.style.backgroundImage = defaultSlotIcon != null
+                ? new StyleBackground(defaultSlotIcon)
+                : new StyleBackground((Texture2D)null);
+
+            slotElement.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
+
+            string slotNumber = "";
+            if (slotElement == hotbarSlots[0]) slotNumber = "1";
+            else if (slotElement == hotbarSlots[1]) slotNumber = "2";
+
+            if (!string.IsNullOrEmpty(slotNumber))
+            {
+                slotElement.Add(new Label(slotNumber)
+                {
+                    style = {
+                    unityTextAlign = TextAnchor.MiddleCenter,
+                    color = Color.white,
+                    fontSize = 20,
+                    alignSelf = Align.Center
+                }
+                });
+            }
         }
     }
-    else
+
+
+    private void UpdateBoostsDisplay()
     {
-        // ... (логика для пустого слота с цифрой)
+        if (boostsPanel == null || InventoryManager.Instance == null) return;
+
+        boostsPanel.Clear();
         
-        // Фон для пустого слота
-        slotElement.style.backgroundImage = defaultSlotIcon != null 
-            ? new StyleBackground(defaultSlotIcon) 
-            : new StyleBackground((Texture2D)null);
-            
-        slotElement.style.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
+        Boost[] assignedBoosts = InventoryManager.Instance.GetAssignedBoosts();
         
-        // Добавляем цифру в качестве дочернего элемента
-        string slotNumber = "";
-        if (slotElement == hotbarSlots[0]) slotNumber = "1";
-        else if (slotElement == hotbarSlots[1]) slotNumber = "2";
-        
-        if (!string.IsNullOrEmpty(slotNumber))
+        for (int i = 0; i < assignedBoosts.Length; i++)
         {
-            slotElement.Add(new Label(slotNumber) 
-            { 
-                style = { 
-                    unityTextAlign = TextAnchor.MiddleCenter, 
-                    color = Color.white, 
-                    fontSize = 20, 
-                    alignSelf = Align.Center 
-                } 
-            });
+            Boost boost = assignedBoosts[i];
+            
+            if (boost != null)
+            {
+                int remainingMatches = InventoryManager.Instance.GetBoostMatchesRemaining(i); 
+                
+                if (remainingMatches <= 0) continue; 
+                
+                VisualElement boostContainer = new VisualElement();
+                boostContainer.AddToClassList("active-boost-container"); 
+
+                VisualElement iconElement = new VisualElement();
+                iconElement.AddToClassList("boost-icon");
+
+                if (boost.icon != null)
+                {
+                    iconElement.style.backgroundImage = new StyleBackground(boost.icon);
+                    iconElement.style.backgroundColor = Color.clear;
+                }
+                else
+                {
+                    iconElement.style.backgroundColor = boost.color; 
+                }
+                
+                Label durationLabel = new Label 
+                {
+                    text = $"Осталось матчей: {remainingMatches}",
+                };
+                durationLabel.AddToClassList("boost-duration-label");
+                
+                boostContainer.Add(iconElement);
+                boostContainer.Add(durationLabel);
+                boostsPanel.Add(boostContainer);
+            }
         }
     }
-}
 
     private void UpdateHealthBar()
     {
         float normalizedHealth = playerMovement.GetHealthNormalized();
-        
+
         healthBar.style.width = new StyleLength(new Length(normalizedHealth * 100, LengthUnit.Percent));
     }
 
