@@ -1,0 +1,18 @@
+:root {
+  flex-grow: 1;
+}
+
+.main-menu-container { 
+    flex-grow: 1; 
+    background-color: rgb(132, 118, 118);
+}
+
+#Root > .unity-button {
+  background-color: #4a6fa5;
+  color: white;
+  border-color: #333;
+}
+
+#Root > .unity-button:hover {
+  background-color: #5d8bc9;
+}

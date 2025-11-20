@@ -1,0 +1,118 @@
+:root {
+    flex-grow: 1; 
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.hud-root {
+    flex-grow: 1;
+}
+
+.crosshair {
+    position: absolute;
+    width: 10px; 
+    height: 10px;
+    background-color: white; 
+    border-radius: 5px; 
+    
+    left: 50%;
+    top: 50%;
+    margin-left: -5px; 
+    margin-top: -5px;
+}
+
+.stats-panel {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    
+    width: 300px; 
+    
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+}
+
+.stat-bar-container {
+    height: 25px;
+    width: 100%;
+    margin-bottom: 5px;
+    background-color: rgba(30, 30, 30, 0.7); 
+    border-width: 1px;
+    border-color: #333;
+    border-radius: 4px;
+}
+
+.health-color { border-color: #a00; }
+.stamina-color { border-color: #0a0; }
+
+.stat-bar-fill {
+    height: 100%;
+    width: 100%; 
+    transition-duration: 0.2s; 
+}
+
+#HealthBar { background-color: rgb(180, 50, 50); }
+#StaminaBar { background-color: rgb(50, 180, 50); }
+
+.hotbar {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    flex-direction: row; 
+    width: 300px; 
+    margin-left: -150px;
+}
+
+.hotbar-slot {
+    width: 50px;
+    height: 50px;
+    margin: 0 5px; 
+    background-color: rgba(50, 50, 50, 0.7);
+    border-color: #aaa;
+    border-width: 2px;
+    border-radius: 5px;
+}
+
+
+
+
+
+/*Панель активных бустов*/
+.boosts-panel {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    flex-direction: row; 
+    align-items: flex-end; 
+}
+
+.active-boost-container {
+    width: 100px; 
+    height: 80px; 
+    margin-left: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.boost-icon {
+    width: 60px;
+    height: 60px;
+    border-width: 2px;
+    border-color: #0ff; 
+    border-radius: 4px;
+    background-color: rgba(30, 30, 30, 0.7);
+}
+
+.boost-duration-label {
+    font-size: 10px;
+    color: #fff;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    height: 20px; 
+    width: 100%;
+    margin-top: 2px;
+    background-color: rgba(0, 0, 0, 0.5); 
+}
+

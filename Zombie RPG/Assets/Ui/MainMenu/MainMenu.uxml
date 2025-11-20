@@ -1,0 +1,12 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Ui/MainMenu/MainMenu.uss?fileID=7433441132597879392&amp;guid=2fdbbd9a0462f6b4c99ddcbaa722e449&amp;type=3#MainMenu" />
+    
+        <ui:VisualElement name="VisualElement" class="main-menu-container"> 
+        <ui:Label text="Главное Меню&#10;&#10;" style="-unity-text-align: upper-center; height: 151px;" />
+        <ui:Button text="Играть" name="btnPlay" />
+        <ui:Button text="Контракты" name="btnContracts" />
+        <ui:Button text="Инвентарь" name="btnInventory" />
+        <ui:Button text="Статистика" name="btnStats" />
+        <ui:Button text="Настройки" name="btnSettings" />
+    </ui:VisualElement>
+</ui:UXML>
