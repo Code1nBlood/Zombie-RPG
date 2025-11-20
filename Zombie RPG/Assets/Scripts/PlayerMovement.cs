@@ -119,6 +119,21 @@ public class PlayerMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
+    //Получить текущие хп
+    public float GetCurrentHealth()
+    {
+        return currentHealth;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
+        {
+            currentHealth = 0;
+            Die(); 
+        }
+    }
 
     IEnumerator Roll()
     {
@@ -170,6 +185,8 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    
+
     public void ApplyHealthBoost()
     {
         //Увеличение регенерации HP на 10% (множитель становится 1.1)
@@ -203,15 +220,6 @@ public class PlayerMovement : MonoBehaviour
         return currentHealth / (maxHealth * maxHealthModifier);
     }
 
-    public void TakeDamage(float damage)
-    {
-        currentHealth -= damage;
-        if (currentHealth <= 0)
-        {
-            currentHealth = 0;
-            Die(); 
-        }
-    }
     private void Die()
     {
         Debug.Log("Игрок мертв!");
