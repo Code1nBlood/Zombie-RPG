@@ -6,6 +6,11 @@
         <ui:VisualElement name="BoostsPanel" class="boosts-panel"></ui:VisualElement>
         <ui:VisualElement name="Crosshair" class="crosshair" />
 
+        <ui:VisualElement name="RoundInfo" class="round-info-panel">
+            <ui:Label name="RoundLabel" class="round-label" text="Раунд: 1" />
+            <ui:Label name="TimerLabel" class="timer-label" text="3:00" />
+        </ui:VisualElement>
+
         <ui:VisualElement name="StatsPanel" class="stats-panel">
             <ui:VisualElement name="HealthBarContainer" class="stat-bar-container health-color">
                 <ui:VisualElement name="HealthBar" class="stat-bar-fill" />

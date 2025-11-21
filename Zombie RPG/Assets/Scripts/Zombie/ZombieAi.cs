@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+
 public class ZombieAi : MonoBehaviour
 {
     public enum State
@@ -11,22 +12,26 @@ public class ZombieAi : MonoBehaviour
 
     public State currentState = State.Wander;
 
+    [Header("Health")]
+    public float maxHealth = 50f; // Базовое HP
+    private float currentHealth;
+
     [Header("Attack")]
-    public float attackRange = 5f;
-    public float attackDamage = 20f;
-    public float attackCooldown = 1f;
+    public float attackRange = 2f; 
+    [HideInInspector] public float attackDamage = 20f;
+    public float attackCooldown = 1.5f;
     private float lastAttackTime = 0f;
 
     [Header("References")]
-    public Transform player;           
+    public Transform player;
 
     [Header("Параметры блуждания")]
-    public float wanderRadius = 5f;       // Радиус в котором ищем точки
-    public float wanderPointDelay = 3f;   // Пауза между сменой точек
+    public float wanderRadius = 10f;
+    public float wanderPointDelay = 4f;
 
     [Header("Параметры чувств")]
-    public float sightRange = 12f;        // Дистанция "зрения"
-    public float hearingForgetTime = 3f;  // Сколько секунд зомби помнит шум
+    public float sightRange = 15f;
+    public float hearingForgetTime = 5f;
     private PlayerMovement playerMovement;
 
     private NavMeshAgent agent;
@@ -41,22 +46,28 @@ public class ZombieAi : MonoBehaviour
 
     private void Start()
     {
+        currentHealth = maxHealth;
         PickNewWanderPoint();
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        playerMovement = player.GetComponent<PlayerMovement>();
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+            playerMovement = player.GetComponent<PlayerMovement>();
+        }
     }
 
     private void Update()
     {
         if (player == null) return;
+
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        if (player != null && distanceToPlayer <= attackRange)
+
+        // Атака при близости (независимо от состояния)
+        if (distanceToPlayer <= attackRange)
         {
-            print(2);
             TryAttackPlayer();
         }
-        print(distanceToPlayer);
-        print(player);
+
         bool canSeePlayer = distanceToPlayer <= sightRange && HasLineOfSight();
 
         // Выбор состояния
@@ -82,9 +93,7 @@ public class ZombieAi : MonoBehaviour
 
             case State.Investigate:
                 agent.SetDestination(lastHeardPosition);
-
-                // Если дошёл до места шума — забываем его
-                if (Vector3.Distance(transform.position, lastHeardPosition) < 0.5f)
+                if (Vector3.Distance(transform.position, lastHeardPosition) < 1f)
                 {
                     lastHeardTime = -999f;
                 }
@@ -97,30 +106,23 @@ public class ZombieAi : MonoBehaviour
                 }
                 break;
         }
-
-        // Тут можно потом добавить атаку:
-        // if (distanceToPlayer <= attackRange) { ... }
     }
-
-    
 
     private bool HasLineOfSight()
     {
-        // Простая проверка прямой видимости до игрока
-        Vector3 origin = transform.position + Vector3.up * 1.5f;
-        Vector3 direction = (player.position - origin).normalized;
+        Vector3 origin = transform.position + Vector3.up * 1.2f;
+        Vector3 target = player.position + Vector3.up * 1f;
+        Vector3 direction = (target - origin).normalized;
 
         if (Physics.Raycast(origin, direction, out RaycastHit hit, sightRange))
         {
             return hit.transform == player;
         }
-
         return false;
     }
 
     private void TryAttackPlayer()
     {
-        print(11);
         if (Time.time - lastAttackTime < attackCooldown) return;
         if (playerMovement != null)
         {
@@ -131,32 +133,42 @@ public class ZombieAi : MonoBehaviour
 
     private bool ReachedDestination()
     {
-        if (!agent.hasPath) return true;
-        if (agent.pathPending) return false;
-
-        return agent.remainingDistance <= agent.stoppingDistance;
+        return !agent.pathPending && agent.remainingDistance <= agent.stoppingDistance;
     }
-
 
     private void PickNewWanderPoint()
     {
-        Vector3 randomDirection = Random.insideUnitSphere * wanderRadius;
-        randomDirection += transform.position;
-
-        if (NavMesh.SamplePosition(randomDirection, out NavMeshHit navHit, wanderRadius, NavMesh.AllAreas))
+        Vector3 randomPoint = transform.position + Random.insideUnitSphere * wanderRadius;
+        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, wanderRadius * 2, NavMesh.AllAreas))
         {
-            agent.SetDestination(navHit.position);
+            agent.SetDestination(hit.position);
         }
-
         nextWanderTime = Time.time + wanderPointDelay;
     }
 
-    /// <summary>
-    /// Вызывается, когда зомби слышит шум.
-    /// </summary>
     public void OnHeardNoise(Vector3 noisePosition)
     {
         lastHeardPosition = noisePosition;
         lastHeardTime = Time.time;
+    }
+
+    // Вызывается при попадании
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        Debug.Log("Зомби убит!");
+        if (RoundManager.Instance != null)
+        {
+            RoundManager.Instance.OnZombieKilled();
+        }
+        Destroy(gameObject);
     }
 }
