@@ -30,9 +30,17 @@ public class PlayerMovement : MonoBehaviour
     public float minStaminaToSprint = 10f; // Минимальное количество стамины для бега
 
     [Header("Rolling")]
-    public float rollDuration = 0.8f; // Продолжительность деша
-    public float rollSpeed = 15f;     // Скорость деша
+    public float rollDuration = 0.2f; // Продолжительность деша
+    public float rollSpeed = 40f;     // Скорость деша
     public float rollCooldown = 2f;   // Время перезарядки деша
+
+    [Header("Camera Shake & Bob (для динамики)")]
+    public Transform cameraToShake; // Назначьте Transform камеры в инспекторе (лучше child-объект камеры для тряски)
+    public float walkBobAmount = 0.02f;  // Амплитуда боба при ходьбе
+    public float sprintBobAmount = 0.04f; // Амплитуда боба при беге
+    public float walkBobSpeed = 10f;     // Скорость боба при ходьбе
+    public float sprintBobSpeed = 16f;   // Скорость боба при беге
+    public float shakeAmount = 0.015f;   // Дополнительная тряска (Perlin noise)
 
     private float currentStamina;
     private bool isSprinting = false;
@@ -40,13 +48,23 @@ public class PlayerMovement : MonoBehaviour
     private bool canRoll = true; // Для кулдауна
     private float rollTimer = 0f;
 
+    private float bobTimer = 0f; // Таймер для боба и тряски
+
     Vector3 velocity;
     bool isGrounded;
+    private Vector3 idleCamPos;
 
     void Start()
     {
         currentStamina = maxStamina;
         currentHealth = maxHealth;
+
+        if (cameraToShake == null)
+        {
+            cameraToShake = Camera.main.transform;
+        }
+
+        idleCamPos = cameraToShake.localPosition;
     }
 
     void Update()
@@ -110,18 +128,53 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+        float x = 0f;
+        float z = 0f;
+
         if (!isRolling)
         {
-            float x = Input.GetAxis("Horizontal");
-            float z = Input.GetAxis("Vertical");
+            x = Input.GetAxis("Horizontal");
+            z = Input.GetAxis("Vertical");
 
             Vector3 move = transform.right * x + transform.forward * z;
             controller.Move(move * currentSpeed * Time.deltaTime);
         }
+        HandleCameraShakeAndBob(x, z, currentSpeed, isSprinting);
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }
+
+    private void HandleCameraShakeAndBob(float x, float z, float currSpeed, bool sprinting)
+    {
+        if (cameraToShake == null || !isGrounded || isRolling) return;
+
+        float horizSpeed = new Vector2(x, z).magnitude * currSpeed;
+        if (horizSpeed < 0.1f)
+        {
+            cameraToShake.localPosition = Vector3.Lerp(cameraToShake.localPosition, idleCamPos, 8f * Time.deltaTime);
+            return;
+        }
+
+        float bobAmount = sprinting ? sprintBobAmount : walkBobAmount;
+        float bobSpeed = sprinting ? sprintBobSpeed : walkBobSpeed;
+
+        bobTimer += Time.deltaTime * bobSpeed * (horizSpeed / speed);
+
+        // Head bob (классический боб головы)
+        float bobY = Mathf.Sin(bobTimer) * bobAmount;
+        float bobX = Mathf.Cos(bobTimer * 2f) * bobAmount * 0.5f;
+
+        // Дополнительная тряска (Perlin noise для реализма)
+        float noiseX = (Mathf.PerlinNoise(bobTimer * 3f, 0f) * 2f - 1f) * shakeAmount;
+        float noiseY = (Mathf.PerlinNoise(bobTimer * 3f + 50f, 0f) * 2f - 1f) * shakeAmount * 0.6f;
+
+        Vector3 targetOffset = idleCamPos + new Vector3(bobX + noiseX, bobY + noiseY, 0f);
+
+        cameraToShake.localPosition = Vector3.Lerp(cameraToShake.localPosition, targetOffset, 12f * Time.deltaTime);
+    }
+
+
     //Получить текущие хп
     public float GetCurrentHealth()
     {
@@ -188,10 +241,8 @@ public class PlayerMovement : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < rollDuration)
         {
-            controller.Move(rollDirection * rollSpeed * Time.deltaTime);
-
-            Vector3 rollMove = new Vector3(rollDirection.x, 0, rollDirection.z).normalized * rollSpeed * Time.deltaTime;
-            controller.Move(rollMove);
+            controller.Move(rollDirection.normalized * rollSpeed * Time.deltaTime);
+            velocity.y = 0f; 
 
             elapsed += Time.deltaTime;
             yield return null;

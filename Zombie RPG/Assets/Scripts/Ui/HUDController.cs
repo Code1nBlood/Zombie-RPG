@@ -11,6 +11,10 @@ public class HUDController : MonoBehaviour
     private VisualElement healthBar;
     private VisualElement staminaBar;
     private VisualElement boostsPanel;
+    private Label roundLabel;
+    private Label timerLabel;
+
+    private RoundManager roundManager;
 
     private readonly VisualElement[] hotbarSlots = new VisualElement[5];
     private readonly VisualElement[] potionSlotsUI = new VisualElement[2];
@@ -23,6 +27,10 @@ public class HUDController : MonoBehaviour
         healthBar = root.Q<VisualElement>("HealthBar");
         staminaBar = root.Q<VisualElement>("StaminaBar");
         boostsPanel = root.Q<VisualElement>("BoostsPanel");
+        roundLabel = root.Q<Label>("RoundLabel");
+        timerLabel = root.Q<Label>("TimerLabel");
+
+        roundManager = RoundManager.Instance;
 
         InitializeHotbar(root);
 
@@ -81,8 +89,25 @@ public class HUDController : MonoBehaviour
             UpdateHealthBar();
             UpdateStaminaBar();
         }
+
+        if (roundManager != null && roundLabel != null && timerLabel != null)
+        {
+            roundLabel.text = $"Раунд: {roundManager.GetCurrentRound()}";
+
+            float timeLeft = roundManager.GetTimeLeft();
+            string prefix = roundManager.IsBreakActive() ? "Перерыв: " : "";
+            timerLabel.text = prefix + FormatTime(timeLeft);
+        }
         
         HandleHotbarInput();
+    
+    }
+
+    private string FormatTime(float totalSeconds)
+    {
+        int minutes = Mathf.FloorToInt(totalSeconds / 60f);
+        int seconds = Mathf.FloorToInt(totalSeconds % 60f);
+        return $"{minutes}:{seconds:00}";
     }
     
     private void HandleHotbarInput()
