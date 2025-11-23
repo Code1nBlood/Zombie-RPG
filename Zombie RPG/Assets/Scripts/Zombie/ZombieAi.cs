@@ -1,7 +1,5 @@
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
-using UnityEngine.UI;
 public class ZombieAi : MonoBehaviour
 {
     public enum State
@@ -11,6 +9,8 @@ public class ZombieAi : MonoBehaviour
         Investigate
     }
 
+    
+
     public Animator animator;
     public State currentState = State.Wander;
     private float rotationSpeed = 360f;
@@ -18,7 +18,9 @@ public class ZombieAi : MonoBehaviour
     private float aBL; //attackBaseLength
     private float aCS; //attackClipSpeed
     private float fAS; //finalAttackSpeed
-
+    [Header("Health")]
+    public float maxHealth = 50f; // Базовое HP
+    private float currentHealth;
     [Header("Attack")]
     public float attackRange = 5f;
     public float attackDamage = 20f;
@@ -238,6 +240,22 @@ public class ZombieAi : MonoBehaviour
         }
 
         nextWanderTime = Time.time + wanderPointDelay;
+    }
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage;
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+    private void Die()
+    {
+        Debug.Log("Зомби убит!");
+        if (RoundManager.Instance != null)
+        {
+            RoundManager.Instance.OnZombieKilled();
+        }
     }
 
     /// <summary>
