@@ -1,5 +1,7 @@
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 public class ZombieAi : MonoBehaviour
 {
     public enum State
@@ -9,7 +11,13 @@ public class ZombieAi : MonoBehaviour
         Investigate
     }
 
+    public Animator animator;
     public State currentState = State.Wander;
+    private float rotationSpeed = 360f;
+    float speedAnimationAttack;
+    private float aBL; //attackBaseLength
+    private float aCS; //attackClipSpeed
+    private float fAS; //finalAttackSpeed
 
     [Header("Attack")]
     public float attackRange = 5f;
@@ -21,11 +29,12 @@ public class ZombieAi : MonoBehaviour
     public Transform player;           
 
     [Header("Параметры блуждания")]
-    public float wanderRadius = 5f;       // Радиус в котором ищем точки
-    public float wanderPointDelay = 3f;   // Пауза между сменой точек
+    public float wanderRadius = 20f;       // Радиус в котором ищем точки
+    public float wanderPointDelay = 10f;   // Пауза между сменой точек
 
     [Header("Параметры чувств")]
-    public float sightRange = 12f;        // Дистанция "зрения"
+    public float sightRange = 50f;        // Дистанция "зрения"
+    public float viewAngle = 120f;  
     public float hearingForgetTime = 3f;  // Сколько секунд зомби помнит шум
     private PlayerMovement playerMovement;
 
@@ -34,14 +43,30 @@ public class ZombieAi : MonoBehaviour
     private float lastHeardTime = -999f;
     private float nextWanderTime;
 
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
+        agent.updateRotation = false;
+        foreach(var clip in animator.runtimeAnimatorController.animationClips)
+        {
+            if (clip.name == "Punch")
+            {
+                aBL = clip.length;
+
+                break;
+            }
+        }
+        aCS = animator.speed;
+        fAS = aBL/aCS; //получаем сколько длится кадр удара
+        agent.autoBraking = false;
     }
 
     private void Start()
     {
         PickNewWanderPoint();
+        Rotate();
         player = GameObject.FindGameObjectWithTag("Player").transform;
         playerMovement = player.GetComponent<PlayerMovement>();
     }
@@ -50,14 +75,7 @@ public class ZombieAi : MonoBehaviour
     {
         if (player == null) return;
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-        if (player != null && distanceToPlayer <= attackRange)
-        {
-            print(2);
-            TryAttackPlayer();
-        }
-        print(distanceToPlayer);
-        print(player);
-        bool canSeePlayer = distanceToPlayer <= sightRange && HasLineOfSight();
+        bool canSeePlayer = CanSeePlayer();
 
         // Выбор состояния
         if (canSeePlayer)
@@ -77,7 +95,13 @@ public class ZombieAi : MonoBehaviour
         switch (currentState)
         {
             case State.Chase:
+                if(Time.time - lastAttackTime< fAS) break;
+                if (canAttack())
+                {
+                    TryAttackPlayer();
+                }
                 agent.SetDestination(player.position);
+                Rotate();
                 break;
 
             case State.Investigate:
@@ -95,14 +119,66 @@ public class ZombieAi : MonoBehaviour
                 {
                     PickNewWanderPoint();
                 }
+                Rotate();
                 break;
         }
+        float speed = agent.velocity.magnitude;
+        animator.SetFloat("Speed", speed);
+        float agentSpeed = agent.speed;
+        float animSpeed = 0f;
+        if (agentSpeed > 0.01f)
+        {
+            animSpeed = speed / agent.speed;
+        }
 
-        // Тут можно потом добавить атаку:
-        // if (distanceToPlayer <= attackRange) { ... }
+        animSpeed = Mathf.Clamp(animSpeed, 0f, 2f);
+
+        animator.SetFloat("AnimSpeed", animSpeed);
     }
 
-    
+    private bool CanSeePlayer()
+    {
+        if(player == null)return false;
+
+        Vector3 toPlayer = player.position-transform.position;
+        toPlayer.y=0f;
+
+        float distance = toPlayer.magnitude;
+        if(distance>sightRange)return false;
+        if(distance<0.001f) return false;
+
+        Vector3 dirToPlayer = toPlayer.normalized;
+        Vector3 forward = transform.forward;
+
+        float angle = Vector3.Angle(forward, dirToPlayer);
+        if(angle>viewAngle*0.5f) return false;
+        return HasLineOfSight();
+    }
+
+    private void Rotate()
+    {
+        if(player == null) return;
+        Vector3 dir;
+        if (agent.velocity.magnitude > 0.1f)
+        {
+            dir = agent.velocity;
+        }
+        else
+        {
+            dir = player.position - transform.position;
+        }
+        if(dir.sqrMagnitude<0.001f)return;
+        dir.Normalize();
+        dir.y = 0;
+        float dot = Vector3.Dot(transform.forward, dir);
+        if (dot < 0f)
+        {
+            return;
+        }
+        Quaternion targetRotate = Quaternion.LookRotation(dir);
+        float maxDegrees = rotationSpeed * Time.deltaTime;
+        transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotate, maxDegrees);
+    }
 
     private bool HasLineOfSight()
     {
@@ -118,10 +194,23 @@ public class ZombieAi : MonoBehaviour
         return false;
     }
 
+    private bool canAttack()
+    {
+        if(Vector3.Distance(transform.position, player.position)>attackRange) return false;
+        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("Attack")) return false;
+        if(Time.time-lastAttackTime<attackCooldown)return false;
+        var state = animator.GetAnimatorTransitionInfo(0);
+        if(state.IsName("Attack"))return false;
+        return true;
+    }
+
     private void TryAttackPlayer()
     {
-        print(11);
         if (Time.time - lastAttackTime < attackCooldown) return;
+        if(animator != null)
+        {
+            animator.SetTrigger("Attack");
+        }
         if (playerMovement != null)
         {
             playerMovement.TakeDamage(attackDamage);

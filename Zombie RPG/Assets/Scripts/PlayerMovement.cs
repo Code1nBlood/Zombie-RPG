@@ -3,7 +3,10 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
+    private float timeSlowing = 1.5f;
+    private float multiplierSlowing = 0.35f;
     public CharacterController controller;
+    private Coroutine slowCoroutine;
     public float speed = 12f; // Скорость ходьбы
     public float sprintSpeed = 16f; // Скорость бега
     public float gravity = -9.81f;
@@ -88,7 +91,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftControl) && isGrounded && !isRolling && canRoll)
         {
-            if (currentStamina >= 20f) 
+            if (currentStamina >= 20f ) 
             {
                 StartCoroutine(Roll());
                 currentStamina -= 20f; 
@@ -128,6 +131,7 @@ public class PlayerMovement : MonoBehaviour
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
+        slowDown(timeSlowing,multiplierSlowing);
         if (currentHealth <= 0)
         {
             currentHealth = 0;
@@ -135,6 +139,33 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void slowDown(float time, float value)
+    {
+        if(slowCoroutine != null)
+        {
+            StopCoroutine(slowCoroutine);
+        }
+        slowCoroutine = StartCoroutine(slowDownCoroutine(time,value));
+    }
+
+    private IEnumerator slowDownCoroutine(float time, float value)
+    {
+        float originalSpeed = speed;
+        float originalSprintSpeed = sprintSpeed;
+
+        speed*=value;
+        sprintSpeed*=value;
+        canRoll = false;
+
+        yield return new WaitForSeconds(time);
+
+        speed = originalSpeed;
+        sprintSpeed = originalSprintSpeed;
+        canRoll=true;
+
+        slowCoroutine = null;
+
+    }
     IEnumerator Roll()
     {
         isRolling = true;

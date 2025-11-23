@@ -397,7 +397,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
-  m_StoppingDistance: 0
+  m_StoppingDistance: 1.4
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1
@@ -422,10 +422,10 @@ MonoBehaviour:
   attackDamage: 20
   attackCooldown: 2
   player: {fileID: 0}
-  wanderRadius: 5
-  wanderPointDelay: 3
-  sightRange: 12
-  hearingForgetTime: 3
+  wanderRadius: 15
+  wanderPointDelay: 10
+  sightRange: 50
+  hearingForgetTime: 5
 --- !u!54 &4525425515780827658
 Rigidbody:
   m_ObjectHideFlags: 0
