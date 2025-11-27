@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: Killer
   m_EditorClassIdentifier: Assembly-CSharp::Boost
   boostName: "\u0423\u0431\u0438\u0439\u0446\u0430"
-  effect: "+ 5 \u0435\u0434\u0438\u043D\u0438\u0446 \u043A \u0443\u0440\u043E\u043D\u0443
-    \u043E\u0440\u0443\u0436\u0438\u044F"
-  duration: "3 \u043C\u0430\u0442\u0447\u0430"
+  description: 
+  effectType: 1
+  effectDescription: 
+  rounds: 3
   icon: {fileID: 21300000, guid: b3a734806f5b8e642aaf6e62fec6badc, type: 3}
   color: {r: 1, g: 1, b: 1, a: 1}

@@ -6,6 +6,7 @@ using System.Linq;
 
 public class InventoryManager : MonoBehaviour
 {
+    [SerializeField] private EffectApplicator effectApplicator;
     public static InventoryManager Instance { get; private set; }
 
     [Header("UI Assets")]
@@ -48,25 +49,17 @@ public class InventoryManager : MonoBehaviour
     }
 
     public void UsePotionFromSlot(int index)
-{
-    Potion potion = GetPotionInSlot(index);
-
-    if (potion != null)
     {
-        PlayerMovement player = FindFirstObjectByType<PlayerMovement>();
-        if (player != null)
+        var potion = GetPotionInSlot(index);
+        if (potion != null)
         {
-            player.UseHealthPotion();
-        }
+            effectApplicator?.ApplyPotion(potion);
 
-        potionSlotItems[index] = null;
-        
-        UpdatePotionSlotVisual(index); 
-        
-        OnPotionAssigned?.Invoke(null, index); 
-        
+            potionSlotItems[index] = null;
+            UpdatePotionSlotVisual(index);
+            OnPotionAssigned?.Invoke(null, index);
+        }
     }
-}
     public Potion[] GetAssignedPotions()
     {
         return potionSlotItems; 
@@ -83,6 +76,16 @@ public class InventoryManager : MonoBehaviour
         Instance = this;
         DontDestroyOnLoad(this.gameObject);
         uiDocument = GetComponent<UIDocument>();
+        effectApplicator = FindAnyObjectByType<EffectApplicator>();
+
+        if (effectApplicator == null)
+        {
+            Debug.LogError("[InventoryManager] EffectApplicator НЕ НАЙДЕН! Зелья и бусты НЕ будут работать!");
+        }
+        else
+        {
+            Debug.Log("[InventoryManager] EffectApplicator успешно найден!");
+        }
     }
 
     public void OpenInventory()
@@ -193,7 +196,9 @@ public class InventoryManager : MonoBehaviour
     private void BindPotionItem(VisualElement el, int idx)
     {
         var p = collectedPotions[idx];
-        BindItem(el, p.potionName, p.effect, p.duration, p.icon, p.color, p);
+        string durationText = p.duration > 0 ? $"{p.duration} сек" : "Мгновенно";
+        
+        BindItem(el, p.potionName, p.effectDescription, durationText, p.icon, p.color, p);
         el.RegisterCallback<PointerDownEvent>(evt => StartDrag(evt, p, el));
     }
 
@@ -202,7 +207,9 @@ public class InventoryManager : MonoBehaviour
     private void BindBoostItem(VisualElement el, int idx)
     {
         var b = collectedBoosts[idx];
-        BindItem(el, b.boostName, b.effect, b.duration, b.icon, b.color, b);
+        string durationText = $"{b.rounds} раунда(ов)";
+
+        BindItem(el, b.boostName, b.effectDescription, durationText, b.icon, b.color, b);
         el.RegisterCallback<PointerDownEvent>(evt => StartDrag(evt, b, el));
     }
 
@@ -458,6 +465,7 @@ public class InventoryManager : MonoBehaviour
 
         UpdateBoostSlotVisual(idx);
         OnBoostAssigned?.Invoke(b, idx);
+        effectApplicator?.ApplyBoost(b);
         RefreshInventoryDisplay();
     }
 

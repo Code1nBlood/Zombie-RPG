@@ -18,13 +18,17 @@ public class PlayerMovement : MonoBehaviour
     public LayerMask groundMask;
     public float jumpHeight = 3f;
 
+    public float baseSpeed;
+    public float baseSprintSpeed;
+    public float baseHealthRegenRate;
+
     [Header("Health")]
     public float maxHealth = 100f; // Максимальное здоровье
     public float healthRegenRate = 0.5f; // Базовая скорость регенерации HP в секунду
     
-    private float currentHealth;
-    private float healthRegenModifier = 1f; // Множитель для бустов регенерации HP
-    private float maxHealthModifier = 1f; // Множитель для бустов максимального HP
+    public float currentHealth;
+    public float healthRegenModifier = 1f; // Множитель для бустов регенерации HP
+    public float maxHealthModifier = 1f; // Множитель для бустов максимального HP
 
     [Header("Stamina")]
     public float maxStamina = 100f;
@@ -62,6 +66,10 @@ public class PlayerMovement : MonoBehaviour
         currentStamina = maxStamina;
         currentHealth = maxHealth;
 
+        baseSpeed = speed;
+        baseSprintSpeed = sprintSpeed;
+        baseHealthRegenRate = healthRegenRate;
+
         if (cameraToShake == null)
         {
             cameraToShake = Camera.main.transform;
@@ -69,6 +77,13 @@ public class PlayerMovement : MonoBehaviour
         noiser = GetComponent<Noise>();
 
         idleCamPos = cameraToShake.localPosition;
+    }
+
+    public void ResetToBaseParameters()
+    {
+        speed = baseSpeed;
+        sprintSpeed = baseSprintSpeed;
+        healthRegenRate = baseHealthRegenRate;
     }
 
     void Update()
@@ -275,29 +290,6 @@ public class PlayerMovement : MonoBehaviour
             {
                 currentHealth = maxHealth * maxHealthModifier;
             }
-        }
-    }
-
-    
-
-    public void ApplyHealthBoost()
-    {
-        //Увеличение регенерации HP на 10% (множитель становится 1.1)
-        healthRegenModifier += 0.1f;
-
-        // 2. Увеличение максимального HP на 30
-        maxHealth += 30f;
-    }
-    
-    public void UseHealthPotion()
-    {
-        float healAmount = (maxHealth * maxHealthModifier) * 0.5f; 
-        
-        currentHealth += healAmount;
-        
-        if (currentHealth > maxHealth * maxHealthModifier) 
-        {
-            currentHealth = maxHealth * maxHealthModifier;
         }
     }
 

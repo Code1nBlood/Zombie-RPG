@@ -6,6 +6,7 @@ public class HUDController : MonoBehaviour
     public UIDocument document;
 
     public PlayerMovement playerMovement;
+    private ExperienceSystem expSystem;
     
 
     private VisualElement healthBar;
@@ -13,6 +14,8 @@ public class HUDController : MonoBehaviour
     private VisualElement boostsPanel;
     private Label roundLabel;
     private Label timerLabel;
+    private VisualElement experienceBar;
+    private Label experienceLabel;
 
     private RoundManager roundManager;
 
@@ -29,8 +32,23 @@ public class HUDController : MonoBehaviour
         boostsPanel = root.Q<VisualElement>("BoostsPanel");
         roundLabel = root.Q<Label>("RoundLabel");
         timerLabel = root.Q<Label>("TimerLabel");
+        experienceBar = root.Q<VisualElement>("ExperienceBar");
+        experienceLabel = root.Q<Label>("ExperienceLabel");
 
         roundManager = RoundManager.Instance;
+
+        expSystem = FindFirstObjectByType<ExperienceSystem>();
+        if (expSystem == null)
+        {
+            Debug.LogError("ExperienceSystem не найден на сцене!");
+        }
+        else
+        {
+            // Подписываемся на события — это важно!
+            expSystem.OnExperienceGained.AddListener(OnExperienceGained);
+            expSystem.OnLevelUp.AddListener(OnLevelUp);
+        }
+
 
         InitializeHotbar(root);
 
@@ -98,9 +116,55 @@ public class HUDController : MonoBehaviour
             string prefix = roundManager.IsBreakActive() ? "Перерыв: " : "";
             timerLabel.text = prefix + FormatTime(timeLeft);
         }
+
+            // ВРЕМЕННО — ДЛЯ ТЕСТА ОПЫТА
+        if (Input.GetKeyDown(KeyCode.F1))
+        {
+            if (expSystem != null)
+            {
+                expSystem.AddExperience(50);
+                Debug.Log("ТЕСТ: +50 опыта (F1)");
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.F2))
+        {
+            if (expSystem != null)
+            {
+                expSystem.AddExperience(500); // сразу левел-ап
+                Debug.Log("ТЕСТ: +500 опыта → LEVEL UP! (F2)");
+            }
+        }
         
         HandleHotbarInput();
     
+    }
+
+    private void OnExperienceGained(int amount)
+    {
+        UpdateExperienceUI();
+    }
+
+    private void OnLevelUp(int newLevel)
+    {
+        UpdateExperienceUI();
+        // Можно добавить эффект: вспышку, звук и т.д.
+        Debug.Log($"LEVEL UP! Уровень {newLevel}!");
+    }
+
+
+    private void UpdateExperienceUI()
+    {
+        if (expSystem == null || experienceBar == null || experienceLabel == null) return;
+
+        float progress = expSystem.GetExperienceProgress();
+        experienceBar.style.width = Length.Percent(progress * 100f);
+
+        int currentLevel = expSystem.GetCurrentLevel();
+        int currentExp = expSystem.GetCurrentExperience();
+        int expToNext = expSystem.experienceToNextLevel;
+
+        experienceLabel.text = $"Уровень {currentLevel} ({currentExp}/{expToNext})";
     }
 
     private string FormatTime(float totalSeconds)

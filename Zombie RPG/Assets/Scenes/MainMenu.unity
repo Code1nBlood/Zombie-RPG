@@ -191,6 +191,77 @@ MonoBehaviour:
   contractsUxml: {fileID: 9197481963319205126, guid: ed5e38211dee18b41b970ea282f2aab4, type: 3}
   contractCardUxml: {fileID: 9197481963319205126, guid: 676f3b9505728a34aa5c8f3df6e8ebcf, type: 3}
   inventoryManager: {fileID: 1520341733}
+--- !u!1 &694635111
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 694635115}
+  - component: {fileID: 694635114}
+  - component: {fileID: 694635113}
+  - component: {fileID: 694635112}
+  m_Layer: 0
+  m_Name: GameplaySystems
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &694635112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694635111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55bea7c4ed04f134c8a970671213a1c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameplaySystems
+--- !u!114 &694635113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694635111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05fe8e2f533be4248866c3f10429c28b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EffectApplicator
+  player: {fileID: 0}
+--- !u!114 &694635114
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694635111}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dd2de48d8c6ab54ab32b822b859c5e1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EffectSystem
+--- !u!4 &694635115
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 694635111}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 13.75508, y: 0, z: -3.16476}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1072790077
 GameObject:
   m_ObjectHideFlags: 0
@@ -485,6 +556,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b63bb3dc8198c4fb82d96eff399f44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  effectApplicator: {fileID: 694635113}
   inventoryUxml: {fileID: 9197481963319205126, guid: f324e9f5e5473f64199b6f879e2a9875, type: 3}
   allPotions:
   - {fileID: 11400000, guid: 95ab02fe07b283f4abe5ecfaedd794bc, type: 2}
@@ -618,3 +690,4 @@ SceneRoots:
   - {fileID: 1537500540}
   - {fileID: 591697734}
   - {fileID: 1520341734}
+  - {fileID: 694635115}

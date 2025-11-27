@@ -20,6 +20,11 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <ui:VisualElement name="ExperienceBarContainer" class="stat-bar-container experience-color">
+            <ui:VisualElement name="ExperienceBar" class="stat-bar-fill" />
+            <ui:Label name="ExperienceLabel" class="stat-label" text="Уровень 1" />
+        </ui:VisualElement>
+
         <ui:VisualElement name="Hotbar" class="hotbar">
             <ui:VisualElement name="Slot1" class="hotbar-slot" />
             <ui:VisualElement name="Slot2" class="hotbar-slot" />

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 public class ZombieAi : MonoBehaviour
 {
+    public static event System.Action OnZombieKilled;
     public enum State
     {
         Wander,
@@ -274,13 +275,15 @@ public class ZombieAi : MonoBehaviour
             Die();
         }
     }
-    private void Die()
+    public void Die()
     {
+        OnZombieKilled?.Invoke();
         Debug.Log("Зомби убит!");
         if (RoundManager.Instance != null)
         {
             RoundManager.Instance.OnZombieKilled();
         }
+        Destroy(gameObject);
     }
 
     /// <summary>
