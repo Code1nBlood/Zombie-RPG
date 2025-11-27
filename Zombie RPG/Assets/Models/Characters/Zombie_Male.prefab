@@ -359,6 +359,7 @@ GameObject:
   - component: {fileID: 4030505438947578238}
   - component: {fileID: 4525425515780827658}
   - component: {fileID: 7737545271859736478}
+  - component: {fileID: 1405588280491870306}
   m_Layer: 0
   m_Name: Zombie_Male
   m_TagString: Untagged
@@ -417,15 +418,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c0fbd1fecb28bd4aa579ed165ec5aad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAi
+  animator: {fileID: 1405588280491870306}
   currentState: 0
-  maxHealth: 50
   attackRange: 3.5
   attackDamage: 20
   attackCooldown: 2
   player: {fileID: 0}
   wanderRadius: 15
-  wanderPointDelay: 10
+  wanderPointDelay: 30
   sightRange: 50
+  viewAngle: 120
   hearingForgetTime: 5
 --- !u!54 &4525425515780827658
 Rigidbody:
@@ -477,6 +479,28 @@ CapsuleCollider:
   m_Height: 3.05
   m_Direction: 1
   m_Center: {x: 0, y: 1.45, z: 0}
+--- !u!95 &1405588280491870306
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3459041707644916050}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 651782b4ec3d795439b2c9ced26a0fe4, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &3513475677574675500
 GameObject:
   m_ObjectHideFlags: 0

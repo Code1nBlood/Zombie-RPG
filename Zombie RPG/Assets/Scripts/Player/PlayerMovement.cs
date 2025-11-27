@@ -1,8 +1,11 @@
 using UnityEngine;
-using System.Collections; 
+using System.Collections;
+using Unity.Mathematics;
+using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    Noise noiser;
     private float timeSlowing = 1.5f;
     private float multiplierSlowing = 0.35f;
     public CharacterController controller;
@@ -63,6 +66,7 @@ public class PlayerMovement : MonoBehaviour
         {
             cameraToShake = Camera.main.transform;
         }
+        noiser = GetComponent<Noise>();
 
         idleCamPos = cameraToShake.localPosition;
     }
@@ -78,6 +82,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Input.GetButtonDown("Jump") && isGrounded && !isRolling)
         {
+            noiser.makeNoise(2);
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
@@ -87,6 +92,7 @@ public class PlayerMovement : MonoBehaviour
         float currentSpeed = speed;
         if (Input.GetKey(KeyCode.LeftShift) && isGrounded && !isRolling && currentStamina > minStaminaToSprint)
         {
+            noiser.makeNoise(1);
             isSprinting = true;
             currentSpeed = sprintSpeed;
 
@@ -111,7 +117,9 @@ public class PlayerMovement : MonoBehaviour
         {
             if (currentStamina >= 20f ) 
             {
+
                 StartCoroutine(Roll());
+                noiser.makeNoise(2);
                 currentStamina -= 20f; 
                 if (currentStamina < 0) currentStamina = 0;
             }
@@ -135,7 +143,10 @@ public class PlayerMovement : MonoBehaviour
         {
             x = Input.GetAxis("Horizontal");
             z = Input.GetAxis("Vertical");
-
+            if(x!=0 || z != 0)
+            {
+                noiser.makeNoise(0.5f);
+            }
             Vector3 move = transform.right * x + transform.forward * z;
             controller.Move(move * currentSpeed * Time.deltaTime);
         }
