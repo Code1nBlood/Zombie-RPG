@@ -108,7 +108,6 @@ public class ZombieAi : MonoBehaviour
             case State.Investigate:
                 agent.SetDestination(lastHeardPosition);
                 Rotate();
-                // Если дошёл до места шума — забываем его
                 if (Vector3.Distance(transform.position, lastHeardPosition) < 0.5f)
                 {
                     lastHeardTime = -999f;
@@ -134,13 +133,7 @@ public class ZombieAi : MonoBehaviour
                 break;
         }
         float speed = agent.velocity.magnitude;
-
-        if (ReachedDestination())
-        {
-            agent.velocity = Vector3.zero;
-            speed = 0f;
-        }
-
+        if (ReachedDestination()) speed = 0f;
         animator.SetFloat("Speed", speed);
 
         float agentSpeed = agent.speed;
