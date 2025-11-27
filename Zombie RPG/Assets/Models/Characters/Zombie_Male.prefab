@@ -359,7 +359,7 @@ GameObject:
   - component: {fileID: 4030505438947578238}
   - component: {fileID: 4525425515780827658}
   - component: {fileID: 7737545271859736478}
-  - component: {fileID: 6092753710243110047}
+  - component: {fileID: 1405588280491870306}
   m_Layer: 0
   m_Name: Zombie_Male
   m_TagString: Untagged
@@ -418,15 +418,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c0fbd1fecb28bd4aa579ed165ec5aad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAi
-  animator: {fileID: 0}
+  animator: {fileID: 1405588280491870306}
   currentState: 0
-  maxHealth: 50
   attackRange: 3.5
   attackDamage: 20
   attackCooldown: 2
   player: {fileID: 0}
   wanderRadius: 15
-  wanderPointDelay: 10
+  wanderPointDelay: 30
   sightRange: 50
   viewAngle: 120
   hearingForgetTime: 5
@@ -480,7 +479,7 @@ CapsuleCollider:
   m_Height: 3.05
   m_Direction: 1
   m_Center: {x: 0, y: 1.45, z: 0}
---- !u!95 &6092753710243110047
+--- !u!95 &1405588280491870306
 Animator:
   serializedVersion: 7
   m_ObjectHideFlags: 0

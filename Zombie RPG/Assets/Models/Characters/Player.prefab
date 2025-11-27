@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 5111361090624984466}
   - component: {fileID: 7335822227532338844}
   - component: {fileID: 5238858670462598837}
+  - component: {fileID: 2700503019213329964}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -89,9 +90,27 @@ MonoBehaviour:
   staminaDrainRate: 25
   staminaRegenRate: 10
   minStaminaToSprint: 15
-  rollDuration: 0.8
-  rollSpeed: 14
+  rollDuration: 0.2
+  rollSpeed: 40
   rollCooldown: 2
+  cameraToShake: {fileID: 2644608334547610455}
+  walkBobAmount: 0.11
+  sprintBobAmount: 0.15
+  walkBobSpeed: 7
+  sprintBobSpeed: 8
+  shakeAmount: 0.015
+--- !u!114 &2700503019213329964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1169556221835820840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 116a7e16c8db30b4f852dd08256b0d75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Noise
 --- !u!1 &2798943792697836566
 GameObject:
   m_ObjectHideFlags: 0

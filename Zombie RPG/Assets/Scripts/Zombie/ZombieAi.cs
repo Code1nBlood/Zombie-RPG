@@ -32,10 +32,10 @@ public class ZombieAi : MonoBehaviour
 
     [Header("Параметры блуждания")]
     public float wanderRadius = 20f;       // Радиус в котором ищем точки
-    public float wanderPointDelay = 10f;   // Пауза между сменой точек
+    public float wanderPointDelay = 4f;   // Пауза между сменой точек
 
     [Header("Параметры чувств")]
-    public float sightRange = 50f;        // Дистанция "зрения"
+    public float sightRange = 25f;        // Дистанция "зрения"
     public float viewAngle = 120f;  
     public float hearingForgetTime = 3f;  // Сколько секунд зомби помнит шум
     private PlayerMovement playerMovement;
@@ -76,7 +76,6 @@ public class ZombieAi : MonoBehaviour
     private void Update()
     {
         if (player == null) return;
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         bool canSeePlayer = CanSeePlayer();
 
         // Выбор состояния
@@ -108,7 +107,7 @@ public class ZombieAi : MonoBehaviour
 
             case State.Investigate:
                 agent.SetDestination(lastHeardPosition);
-
+                Rotate();
                 // Если дошёл до места шума — забываем его
                 if (Vector3.Distance(transform.position, lastHeardPosition) < 0.5f)
                 {
@@ -117,15 +116,33 @@ public class ZombieAi : MonoBehaviour
                 break;
 
             case State.Wander:
-                if (Time.time >= nextWanderTime || ReachedDestination())
+                if (ReachedDestination())
+                {
+                    agent.ResetPath();
+
+                    if (nextWanderTime <= 0f)
+                        nextWanderTime = Time.time + wanderPointDelay;
+                }
+
+                if (nextWanderTime > 0f && Time.time >= nextWanderTime)
                 {
                     PickNewWanderPoint();
+                    nextWanderTime = 0f;
                 }
+
                 Rotate();
                 break;
         }
         float speed = agent.velocity.magnitude;
+
+        if (ReachedDestination())
+        {
+            agent.velocity = Vector3.zero;
+            speed = 0f;
+        }
+
         animator.SetFloat("Speed", speed);
+
         float agentSpeed = agent.speed;
         float animSpeed = 0f;
         if (agentSpeed > 0.01f)
@@ -159,24 +176,34 @@ public class ZombieAi : MonoBehaviour
 
     private void Rotate()
     {
-        if(player == null) return;
         Vector3 dir;
-        if (agent.velocity.magnitude > 0.1f)
+
+        switch (currentState)
         {
-            dir = agent.velocity;
+            case State.Chase:
+                if (player == null) return;
+                dir = player.position - transform.position;
+                break;
+
+            case State.Investigate:
+                dir = lastHeardPosition - transform.position;
+                break;
+
+            case State.Wander:
+                if (agent.velocity.sqrMagnitude < 0.01f)
+                    return;
+                dir = agent.velocity;
+                break;
+
+            default:
+                return;
         }
-        else
-        {
-            dir = player.position - transform.position;
-        }
-        if(dir.sqrMagnitude<0.001f)return;
+
+        dir.y = 0f;
+        if (dir.sqrMagnitude < 0.0001f) return;
+
         dir.Normalize();
-        dir.y = 0;
-        float dot = Vector3.Dot(transform.forward, dir);
-        if (dot < 0f)
-        {
-            return;
-        }
+
         Quaternion targetRotate = Quaternion.LookRotation(dir);
         float maxDegrees = rotationSpeed * Time.deltaTime;
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotate, maxDegrees);
@@ -222,10 +249,10 @@ public class ZombieAi : MonoBehaviour
 
     private bool ReachedDestination()
     {
-        if (!agent.hasPath) return true;
         if (agent.pathPending) return false;
+        if (agent.remainingDistance > agent.stoppingDistance) return false;
 
-        return agent.remainingDistance <= agent.stoppingDistance;
+        return !agent.hasPath || agent.velocity.sqrMagnitude < 0.001f;
     }
 
 
@@ -238,8 +265,6 @@ public class ZombieAi : MonoBehaviour
         {
             agent.SetDestination(navHit.position);
         }
-
-        nextWanderTime = Time.time + wanderPointDelay;
     }
     public void TakeDamage(float damage)
     {
