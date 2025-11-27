@@ -420,12 +420,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ZombieAi
   animator: {fileID: 1405588280491870306}
   currentState: 0
-  attackRange: 3.5
+  maxHealth: 50
+  attackRange: 4
   attackDamage: 20
   attackCooldown: 2
   player: {fileID: 0}
   wanderRadius: 15
-  wanderPointDelay: 30
+  wanderPointDelay: 4
   sightRange: 50
   viewAngle: 120
   hearingForgetTime: 5
