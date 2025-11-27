@@ -158,6 +158,7 @@ public class RoundManager : MonoBehaviour
     {
         while (zombiesSpawnedThisRound < totalZombiesThisRound && isRoundActive)
         {
+            Transform spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
             GameObject newZombie = Instantiate(zombiePrefab, spawnPoint.position, spawnPoint.rotation);
 
             // Настройка зомби под раунд

@@ -134,7 +134,12 @@ public class ZombieAi : MonoBehaviour
                 break;
         }
         float speed = agent.velocity.magnitude;
-        if (ReachedDestination()) speed = 0f;
+
+        if (ReachedDestination())
+        {
+            agent.velocity = Vector3.zero;
+            speed = 0f;
+        }
 
         animator.SetFloat("Speed", speed);
 
@@ -245,14 +250,9 @@ public class ZombieAi : MonoBehaviour
     private bool ReachedDestination()
     {
         if (agent.pathPending) return false;
+        if (agent.remainingDistance > agent.stoppingDistance) return false;
 
-        if (agent.remainingDistance <= agent.stoppingDistance)
-        {
-            if (!agent.hasPath || agent.velocity.sqrMagnitude < 0.01f)
-                return true;
-        }
-
-        return false;
+        return !agent.hasPath || agent.velocity.sqrMagnitude < 0.001f;
     }
 
 

@@ -1483,6 +1483,14 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 725422308}
+    - target: {fileID: 4030505438947578238, guid: 116872c887ce9bf42bdf7d482a13ad97, type: 3}
+      propertyPath: attackRange
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 4030505438947578238, guid: 116872c887ce9bf42bdf7d482a13ad97, type: 3}
+      propertyPath: wanderPointDelay
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6104702757593052649, guid: 116872c887ce9bf42bdf7d482a13ad97, type: 3}
       propertyPath: m_LocalPosition.x
       value: -9.6902
