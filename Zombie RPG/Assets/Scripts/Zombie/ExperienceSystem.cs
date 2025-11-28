@@ -18,95 +18,49 @@ public class ExperienceSystem : MonoBehaviour
     // Для UI
     [HideInInspector] public int experienceToNextLevel = 100;
 
-    private void Start()
+    private void OnEnable()
     {
-        if (RoundManager.Instance != null)
-        {
-            RoundManager.OnRoundStart += OnRoundStarted;
-            ZombieAi.OnZombieKilled += OnZombieKilled;
-        }
-        
-        // Инициализация
-        UpdateExperienceToNextLevel();
+        EnemyEvents.OnEnemyKilled += OnEnemyKilled;
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
-        if (RoundManager.Instance != null)
-        {
-            RoundManager.OnRoundStart -= OnRoundStarted;
-            ZombieAi.OnZombieKilled -= OnZombieKilled;
-        }
+        EnemyEvents.OnEnemyKilled -= OnEnemyKilled;
     }
 
-    private void OnZombieKilled()
+    private void OnEnemyKilled(IEnemy enemy)
     {
-        if (!RoundManager.Instance.IsRoundActive()) return;
-        
-        int currentRound = RoundManager.Instance.GetCurrentRound();
-        int experienceForKill = CalculateExperienceForKill(currentRound);
-        
-        AddExperience(experienceForKill);
-    }
+        if (enemy == null) return;
+        if (!RoundManager.Instance?.IsRoundActive() ?? false) return;
 
-    private int CalculateExperienceForKill(int roundNumber)
-    {
-        // Базовый опыт + прирост за раунд + бонус за множитель
-        return Mathf.RoundToInt((baseExperiencePerZombie + (roundNumber - 1) * experienceMultiplierPerRound) * experienceMultiplier);
+        int round = RoundManager.Instance.GetCurrentRound();
+        float roundBonus = (round - 1) * experienceMultiplierPerRound;
+        int reward = Mathf.RoundToInt(enemy.ExperienceReward * (1f + roundBonus) * experienceMultiplier);
+
+        AddExperience(reward);
     }
 
     public void AddExperience(int amount)
     {
         currentExperience += amount;
         OnExperienceGained?.Invoke(amount);
-        
         CheckLevelUp();
     }
 
     private void CheckLevelUp()
     {
-        if (currentExperience >= experienceToNextLevel)
+        while (currentExperience >= experienceToNextLevel)
         {
             currentLevel++;
             currentExperience -= experienceToNextLevel;
             OnLevelUp?.Invoke(currentLevel);
-            
             UpdateExperienceToNextLevel();
         }
     }
 
     private void UpdateExperienceToNextLevel()
     {
-        // Формула для расчета опыта до следующего уровня
         experienceToNextLevel = Mathf.RoundToInt(100 * Mathf.Pow(1.2f, currentLevel - 1));
-    }
-
-    private void OnRoundStarted(int roundNumber)
-    {
-        // Можно добавить логику для начисления бонусного опыта за начало раунда
-    }
-
-    // Для бустов опыта
-    public void ApplyExperienceBoost(float multiplier, int durationInRounds)
-    {
-        // Запускаем корутину для сброса буста после окончания раундов
-        StartCoroutine(ExperienceBoostRoutine(multiplier, durationInRounds));
-    }
-
-    private System.Collections.IEnumerator ExperienceBoostRoutine(float multiplier, int durationInRounds)
-    {
-        float originalMultiplier = experienceMultiplier;
-        experienceMultiplier = multiplier;
-        
-        int currentRound = RoundManager.Instance.GetCurrentRound();
-        int targetRound = currentRound + durationInRounds;
-        
-        while (RoundManager.Instance.GetCurrentRound() < targetRound)
-        {
-            yield return new WaitUntil(() => !RoundManager.Instance.IsRoundActive());
-        }
-        
-        experienceMultiplier = originalMultiplier;
     }
 
     // Геттеры для UI

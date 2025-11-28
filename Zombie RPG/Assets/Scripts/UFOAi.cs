@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class UFOFlyingEnemy : MonoBehaviour
+public class UFOFlyingEnemy : MonoBehaviour, IEnemy
 {
     [Header("=== Основные параметры ===")]
     public float maxHealth = 100f;
@@ -145,11 +145,19 @@ public class UFOFlyingEnemy : MonoBehaviour
 
         moveVelocity += push;
     }
+    [SerializeField] private int experienceReward = 50;
+    public int ExperienceReward => experienceReward;
 
-    public void TakeDamage(float dmg)
+    public void TakeDamage(float damage)
     {
-        health -= dmg;
-        if (health <= 0) Destroy(gameObject);
+        health -= damage;
+        if (health <= 0) Die();
+    }
+
+    public void Die()
+    {
+        EnemyEvents.EnemyKilled(this);
+        Destroy(gameObject);
     }
 
     void OnDrawGizmosSelected()
