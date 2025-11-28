@@ -63,6 +63,15 @@ public class ExperienceSystem : MonoBehaviour
         experienceToNextLevel = Mathf.RoundToInt(100 * Mathf.Pow(1.2f, currentLevel - 1));
     }
 
+        // Новый метод — безопасно меняет множитель
+    public void SetExperienceMultiplier(float multiplier)
+    {
+        experienceMultiplier = multiplier;
+        Debug.Log($"[ExperienceSystem] Множитель опыта изменён на: x{multiplier}");
+    }
+
+
+
     // Геттеры для UI
     public int GetCurrentExperience() => currentExperience;
     public int GetCurrentLevel() => currentLevel;

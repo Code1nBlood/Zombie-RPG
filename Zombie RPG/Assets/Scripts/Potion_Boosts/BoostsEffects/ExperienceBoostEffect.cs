@@ -2,33 +2,43 @@ using UnityEngine;
 
 public class ExperienceBoostEffect : RoundBasedEffect
 {
-    private float _expMultiplier;
-    private ExperienceSystem _expSystem;
-    
-    public ExperienceBoostEffect(float expMultiplier)
+    private readonly float _multiplier;
+
+    public ExperienceBoostEffect(float multiplier, int rounds)
     {
-        Name = "Буст опыта";
-        _expMultiplier = expMultiplier;
+        Name = $"Опыт x{multiplier}";
+        _multiplier = multiplier;
+        RoundsRemaining = rounds;
     }
-    
+
     public override void Apply(GameObject target)
     {
         base.Apply(target);
-        _expSystem = target.GetComponent<ExperienceSystem>();
-        
-        if (_expSystem != null)
+
+        var expSystem = Object.FindAnyObjectByType<ExperienceSystem>();
+        if (expSystem != null)
         {
-            _expSystem.ApplyExperienceBoost(_expMultiplier, RoundsRemaining);
+            // Используем внутреннее поле напрямую (или через метод — ниже)
+            expSystem.SetExperienceMultiplier(_multiplier);
         }
     }
-    
+
     public override void Remove(GameObject target)
     {
-        // Очистка не нужна, так как ExperienceSystem сама управляет своим множителем
+        var expSystem = Object.FindAnyObjectByType<ExperienceSystem>();
+        if (expSystem != null)
+        {
+            expSystem.SetExperienceMultiplier(1f); // сбрасываем
+        }
     }
-    
+
+    // Если хочешь — можно вызвать при окончании раунда
     public override void OnRoundEnd(GameObject target)
     {
-        base.OnRoundEnd(target);
+        RoundsRemaining--;
+        if (RoundsRemaining <= 0)
+        {
+            Remove(target);
+        }
     }
 }
