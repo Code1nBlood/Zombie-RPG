@@ -1,0 +1,65 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3385985742944403155
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1281892913865290770}
+  - component: {fileID: 9097067483159619039}
+  m_Layer: 0
+  m_Name: InventoryData
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1281892913865290770
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3385985742944403155}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.32989, y: 5.55298, z: 8.48131}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9097067483159619039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3385985742944403155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d603271ba1d954438c09abd57d992b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryData
+  currentData:
+    collectedPotionNames:
+    - "\u0417\u0435\u043B\u0435\u043D\u043E\u0435 \u0437\u0435\u043B\u044C\u0435"
+    collectedBoostNames:
+    - "\u0421\u0442\u0440\u0435\u043B\u043E\u043A"
+    potionSlotNames:
+    - 
+    - 
+    boostSlotNames:
+    - 
+    - 
+    - 
+    boostMatchesRemaining: 000000000000000000000000
+  allPotions:
+  - {fileID: 11400000, guid: 95ab02fe07b283f4abe5ecfaedd794bc, type: 2}
+  allBoosts:
+  - {fileID: 11400000, guid: bc685eed0e835654ea34ce2179b922a7, type: 2}
+  - {fileID: 11400000, guid: 395528e54d3ecd744b00626d64424c81, type: 2}
+  - {fileID: 11400000, guid: 4718ab0738ac81345883e7d879ac0fec, type: 2}
