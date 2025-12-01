@@ -3,6 +3,8 @@ using System.Collections;
 using System;
 using Unity.VisualScripting;
 using UnityEngine.AI;
+using System.Linq;
+using UnityEngine.SceneManagement;
 
 
 public class RoundManager : MonoBehaviour
@@ -13,8 +15,10 @@ public class RoundManager : MonoBehaviour
     public float roundDuration = 180f; 
     public float breakDuration = 20f;  
     [Header("Префаб и спавн")]
-    public GameObject zombiePrefab;    // префаб зомби
-    public Transform[] spawnPoints;    // Точки спавна 
+    [SerializeField] private string spawnTag = "ZombieSpawn";
+    [SerializeField] private string zombiePrefabPath = "Zombie_Male";
+    private GameObject zombiePrefab;
+    private Transform[] spawnPoints;
 
     [Header("Параметры зомби (база + прирост за раунд)")]
     [SerializeField] private float baseZombieSpeed = 2f;           // Базовая скорость 
@@ -62,20 +66,73 @@ public class RoundManager : MonoBehaviour
         }
     }
 
-    void Start()
+    void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "SampleScene")
+        {
+            // === ПОЛНЫЙ РЕСЕТ ПРИ ЗАХОДЕ В ИГРУ ===
+            FindZombiePrefabAndSpawns();
+            ResetRoundManager();
+            StartNextRound();
+            Debug.Log("RoundManager: Игра перезапущена!");
+        }
+        else if (scene.name == "MainMenu")
+        {
+            // Остановка всего в главном меню
+            StopAllCoroutines();
+            isRoundActive = false;
+            isBreakActive = false;
+            Debug.Log("RoundManager: Остановлен в главном меню");
+        }
+    }
+
+    private void FindZombiePrefabAndSpawns()
+    {
+        zombiePrefab = Resources.Load<GameObject>(zombiePrefabPath);
         if (zombiePrefab == null)
         {
-            Debug.LogError("RoundManager: Назначьте zombiePrefab!");
-            return;
-        }
-        if (spawnPoints.Length == 0)
-        {
-            Debug.LogError("RoundManager: Добавьте spawnPoints!");
+            Debug.LogError($"RoundManager: Префаб не найден по пути Resources/{zombiePrefabPath}!");
             return;
         }
 
-        StartNextRound();
+        GameObject[] spawnGOs = GameObject.FindGameObjectsWithTag(spawnTag);
+        spawnPoints = spawnGOs.Select(go => go.transform).ToArray();
+
+        if (spawnPoints.Length == 0)
+        {
+            Debug.LogError($"RoundManager: Не найдено объектов с тегом '{spawnTag}'!");
+        }
+        else
+        {
+            Debug.Log($"RoundManager: Найдено {spawnPoints.Length} точек спавна с тегом '{spawnTag}'");
+        }
+    }
+
+    private void ResetRoundManager()
+    {
+        StopAllCoroutines();
+        currentRound = 0;
+        roundTimer = 0f;
+        breakTimer = 0f;
+        isRoundActive = false;
+        isBreakActive = false;
+        zombiesSpawnedThisRound = 0;
+        zombiesAliveThisRound = 0;
+        spawnCoroutine = null;
+        currentZombieSpeed = 0f;
+        currentZombieDamage = 0f;
+        currentSpawnInterval = 0f;
+        totalZombiesThisRound = 0;
     }
 
     void Update()

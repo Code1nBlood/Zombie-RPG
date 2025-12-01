@@ -10,6 +10,9 @@ public class Boost : ScriptableObject, IEffectProvider
     [Header("UI")]
     [TextArea] public string effectDescription = "Удваивает получаемый опыт";
 
+    [Header("Параметры эффекта")]
+    public int experienceMultiplier = 2;
+
     public int rounds = 3;
 
     public Sprite icon;
@@ -21,7 +24,7 @@ public class Boost : ScriptableObject, IEffectProvider
     {
         return effectType switch
         {
-            BoostEffectType.Experience => new ExperienceBoostEffect(rounds),
+            BoostEffectType.Experience => new ExperienceBoostEffect(rounds, experienceMultiplier),
             BoostEffectType.HealthRegeneration => new HealthRegenerationBoost(rounds),
             _ => null
         };

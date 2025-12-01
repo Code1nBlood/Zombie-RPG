@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
-public class ZombieAi : MonoBehaviour
+public class ZombieAi : MonoBehaviour, IEnemy
 {
     public static event System.Action OnZombieKilled;
     public enum State
@@ -260,6 +260,8 @@ public class ZombieAi : MonoBehaviour
             agent.SetDestination(navHit.position);
         }
     }
+
+    public int ExperienceReward => 10;
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
@@ -270,12 +272,11 @@ public class ZombieAi : MonoBehaviour
     }
     public void Die()
     {
-        OnZombieKilled?.Invoke();
-        Debug.Log("Зомби убит!");
+        EnemyEvents.EnemyKilled(this);
+        
         if (RoundManager.Instance != null)
-        {
             RoundManager.Instance.OnZombieKilled();
-        }
+
         Destroy(gameObject);
     }
 
