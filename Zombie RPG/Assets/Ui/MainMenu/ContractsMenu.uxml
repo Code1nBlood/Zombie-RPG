@@ -1,27 +1,43 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <ui:VisualElement name="contractsWindow" style="flex-direction: column; padding: 20px; position: relative; width: 100%; height: 100%; background-color: rgb(155, 147, 209);">
         <ui:Label text="КОНТРАКТЫ" style="font-size: 32px; font-weight: bold; text-align: center; margin-bottom: 20px;" />
-        <ui:VisualElement style="display: flex; justify-content: space-between; width: 100%; margin-bottom: 20px;">
-            <ui:Label name="freeRefreshLabel" text="Бесплатное обновление через: --" 
-            style="font-size: 14px;" />
-            <ui:Button name="paidRefreshButton" text="Обновить за 100 контракт-койнов" 
-            style="font-size: 14px; background-color: #ff6b35; color: white; border: none; padding: 5px 10px; border-radius: 4px;" />
+
+        <ui:VisualElement style="background-color: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 20px; border-width: 2px; border-color: #ffd32a; flex-direction: row;">
+            <ui:Label text="ВАШ БАЛАНС: " style="color: white; font-size: 18px;" />
+            <ui:Label name="currencyLabel" text="0 KK" style="color: #ffd32a; font-size: 18px; -unity-font-style: bold;" />
         </ui:VisualElement>
-        
-        <ui:VisualElement style="flex-grow: 1; display: flex; justify-content: center; padding: 0 20px;">
-            <ui:VisualElement 
-            name="contractsContainer" 
-            style="
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-content: flex-start;
-            max-width: 1080px;
-            width: 100%;
-            margin: 0 auto;
-            min-width: 0;
-        " />
+
+        <ui:VisualElement style="
+            flex-direction: row; 
+            justify-content: space-between; 
+            background-color: rgba(255,255,255,0.1); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin-bottom: 20px;
+            align-items: center;
+        ">
+            <ui:Label name="freeRefreshLabel" text="Бесплатное обновление: --:--:--" 
+                style="color: white; font-size: 16px;" />
+
+            <ui:Button name="paidRefreshButton" text="ОБНОВИТЬ СЕЙЧАС (100 КК)" 
+                style="
+                    background-color: #ff6b35; 
+                    color: white; 
+                    font-size: 14px; 
+                    border-radius: 6px; 
+                    padding: 8px 20px; 
+                    border-width: 0;
+                " />
         </ui:VisualElement>
+
+        <ui:ScrollView style="flex-grow: 1;">
+            <ui:VisualElement name="contractsContainer" style="
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding-bottom: 50px;
+            " />
+        </ui:ScrollView>
         
         <ui:Button name="closeButton" text="✕" style="position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; font-size: 24px; align-items: center; justify-content: center; background-color: rgb(255, 71, 87); color: white; border: none; border-radius: 50%;" />
     </ui:VisualElement>

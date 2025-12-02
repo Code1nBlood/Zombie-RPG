@@ -262,12 +262,13 @@ public class ZombieAi : MonoBehaviour, IEnemy
     }
 
     public int ExperienceReward => 10;
-    public void TakeDamage(float damage)
+    public void TakeDamage(float damage, bool isHeadshot)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
             Die();
+            ContractManager.Instance.ReportKill(isHeadshot);
         }
     }
     public void Die()
@@ -276,6 +277,7 @@ public class ZombieAi : MonoBehaviour, IEnemy
         
         if (RoundManager.Instance != null)
             RoundManager.Instance.OnZombieKilled();
+        
 
         Destroy(gameObject);
     }

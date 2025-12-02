@@ -6,6 +6,10 @@
             <ui:Button text="НАСТРОЙКИ" name="SettingsButton" />
             <ui:Button text="ВЫЙТИ В ГЛАВНОЕ МЕНЮ" name="ExitToMainButton" />
             <ui:Label text="MENU" style="height: 109px; color: rgb(255, 255, 255); -unity-font-style: normal; -unity-font-definition: url(&quot;project://database/Assets/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2230732570650464555&amp;guid=6f70419f3b4d65044a369746648b1d03&amp;type=3#NotInter-Regular&quot;);" />
+            <ui:Label text="Выполняется контракт:" name="ContrackSection" style="top: -520px; left: -720px; color: rgb(255, 255, 255); font-size: 50px; flex-wrap: nowrap; flex-direction: column; justify-content: flex-start; align-items: auto; align-self: auto; align-content: auto; white-space: pre-wrap; text-overflow: clip;" />
+            <ui:Label text="НАЗВАНИЕ(нет активного контракта)" name="ContractName" style="left: -655px; top: -500px; font-size: 40px; color: rgb(255, 255, 255); -unity-text-align: middle-center; white-space: normal;" />
+            <ui:ProgressBar value="22" focusable="false" usage-hints="None" enabled="true" name="ContractProgress" style="top: -447px; left: -748px; width: 507px; justify-content: flex-start; -unity-text-align: upper-left;" />
+            <ui:Label text="Условие" name="Condition" style="left: -656px; top: -422px; color: rgb(13, 255, 0); white-space: normal; font-size: 40px;" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

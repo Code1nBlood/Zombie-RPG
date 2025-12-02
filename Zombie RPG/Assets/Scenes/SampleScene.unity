@@ -808,9 +808,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
   effectApplicator: {fileID: 68188444}
-  inventoryUxml: {fileID: 9197481963319205126, guid: f324e9f5e5473f64199b6f879e2a9875, type: 3}
-  allPotions: []
-  allBoosts: []
 --- !u!114 &1303218571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -887,6 +884,7 @@ GameObject:
   - component: {fileID: 1389745385}
   - component: {fileID: 1389745384}
   - component: {fileID: 1389745386}
+  - component: {fileID: 1389745387}
   m_Layer: 0
   m_Name: ESC_Menu
   m_TagString: Untagged
@@ -946,6 +944,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EscMenuController
   escMenuUI: {fileID: 1389745384}
   hudController: {fileID: 1564076952}
+--- !u!114 &1389745387
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1389745383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b29f7dfb13e894b4b8941fcb13cff323, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SampleSceneContract
+  escMenuDocument: {fileID: 1389745384}
 --- !u!1 &1393368877
 GameObject:
   m_ObjectHideFlags: 0
@@ -1075,7 +1086,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::HUDController
   document: {fileID: 1564076953}
   playerMovement: {fileID: 725422306}
-  defaultSlotIcon: {fileID: 0}
+  defaultSlotBackground: {fileID: 0}
 --- !u!114 &1564076953
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
+using System;
 
 public class Ui : MonoBehaviour
 {
@@ -13,7 +14,32 @@ public class Ui : MonoBehaviour
     private VisualElement contractsWindow;
     private UIDocument uiDocument;
 
+    private Label freeRefreshLabel;
+    private Button paidRefreshButton;
+    private Label currencyLabel;
+    
+    private bool isMenuOpen = false;
+
     private MainMenuInventoryUI inventoryUI;  // Прямая ссылка на наш UI инвентаря
+
+    private void Start()
+    {
+        if (ContractManager.Instance == null)
+        {
+            var go = new GameObject("ContractManager_Global");
+            go.AddComponent<ContractManager>();
+        }
+    }
+
+    private void Update()
+    {
+        // Обновляем таймер каждый кадр, только если меню открыто
+        if (isMenuOpen && freeRefreshLabel != null)
+        {
+            UpdateTimerDisplay();
+        }
+        UpdateHeaderInfo();
+    }
 
     private void Awake()
     {
@@ -97,6 +123,7 @@ public class Ui : MonoBehaviour
         // Инвентарь закрыт → возвращаемся в главное меню
         ShowMainMenu();
     }
+    #region КОНТРАКТЫ
 
     // ====================================================================
     // КОНТРАКТЫ
@@ -109,6 +136,14 @@ public class Ui : MonoBehaviour
 
         uiDocument.rootVisualElement.Clear();
         uiDocument.rootVisualElement.Add(contractsWindow);
+        isMenuOpen = true;
+    }
+
+    private void CloseContracts()
+    {
+        uiDocument.rootVisualElement.Clear();
+        ShowMainMenu();
+        isMenuOpen = false;
     }
 
     private void CreateContractsWindow()
@@ -117,20 +152,65 @@ public class Ui : MonoBehaviour
         contractsWindow.style.flexGrow = 1;
 
         var closeButton = contractsWindow.Q<Button>("closeButton");
-        if (closeButton != null)
-            closeButton.clicked += () => ShowMainMenu();
+        closeButton.clicked += CloseContracts;
 
-        var paidRefreshButton = contractsWindow.Q<Button>("paidRefreshButton");
-        if (paidRefreshButton != null)
-            paidRefreshButton.clicked += OnPaidRefreshClicked;
+        paidRefreshButton = contractsWindow.Q<Button>("paidRefreshButton");
+        paidRefreshButton.clicked += OnRefreshClicked;
 
-        PopulateContractCards();
+        freeRefreshLabel = contractsWindow.Q<Label>("freeRefreshLabel");
+        currencyLabel = contractsWindow.Q<Label>("currencyLabel");
+
+        ContractManager.Instance.OnShopRefreshed += PopulateContractCards;
     }
 
-    private void OnPaidRefreshClicked()
+    private void OnRefreshClicked()
     {
-        Debug.Log("Обновление контрактов за 100 КК");
-        PopulateContractCards(); // можно добавить анимацию
+        var timeRemaining = ContractManager.Instance.GetTimeUntilFreeRefresh();
+
+        if (timeRemaining <= TimeSpan.Zero)
+        {
+            ContractManager.Instance.TryRefreshShop(false);
+        }
+        else
+        {
+            // обновить платно
+            bool success = ContractManager.Instance.TryRefreshShop(true);
+            if (!success)
+            {
+                Debug.Log("Недостаточно денег для обновления!");
+            }
+        }
+        UpdateHeaderInfo(); 
+    }
+
+    private void UpdateTimerDisplay()
+    {
+        var timeSpan = ContractManager.Instance.GetTimeUntilFreeRefresh();
+
+        if (timeSpan <= TimeSpan.Zero)
+        {
+            freeRefreshLabel.text = "Бесплатное обновление: ДОСТУПНО";
+            freeRefreshLabel.style.color = new StyleColor(Color.green);
+            
+            paidRefreshButton.text = "ОБНОВИТЬ БЕСПЛАТНО";
+            paidRefreshButton.style.backgroundColor = new StyleColor(new Color(0.2f, 0.8f, 0.2f)); // Зеленый
+        }
+        else
+        {
+            freeRefreshLabel.text = $"Бесплатное обновление через: {timeSpan.Hours:D2}:{timeSpan.Minutes:D2}:{timeSpan.Seconds:D2}";
+            freeRefreshLabel.style.color = new StyleColor(Color.white);
+            
+            paidRefreshButton.text = "ОБНОВИТЬ ЗА 100 КК";
+            paidRefreshButton.style.backgroundColor = new StyleColor(new Color(1f, 0.4f, 0.2f)); // Оранжевый
+        }
+    }
+
+     private void UpdateHeaderInfo()
+    {
+        if(currencyLabel != null && InventoryData.Instance != null)
+        {
+            currencyLabel.text = $"{InventoryData.Instance.ContractCoins} KK";
+        }
     }
 
     private void PopulateContractCards()
@@ -140,28 +220,70 @@ public class Ui : MonoBehaviour
 
         container.Clear();
 
-        var contracts = new[]
-        {
-            new { Name = "Точность решает всё", Desc = "Убить 10 зомби в голову", Reward = "Убийца", Cost = 50 },
-            new { Name = "Цепляй комбо!", Desc = "Убить 3 зомби подряд без промаха", Reward = "Стрелок", Cost = 80 },
-            new { Name = "На грани жизни и смерти", Desc = "Пережить 5 раз с HP ≤ 10", Reward = "Выживальщик", Cost = 120 }
-        };
+        var allContracts = ContractManager.Instance.GetCurrentShopContracts();
+        var activeContract = ContractManager.Instance.ActiveContract;
+        int playerMoney = InventoryData.Instance.ContractCoins;
 
-        foreach (var c in contracts)
+        foreach (var c in allContracts)
         {
+            if (ContractManager.Instance.IsContractCompleted(c.Id))
+                continue;
+
             var card = contractCardUxml.Instantiate();
-
             card.Q<Label>("contractName").text = c.Name;
-            card.Q<Label>("contractDescription").text = c.Desc;
-            card.Q<Label>("contractReward").text = c.Reward;
+            card.Q<Label>("contractDescription").text = c.Description;
+            card.Q<Label>("contractReward").text = c.RewardText;
 
             var buyButton = card.Q<Button>("buyButton");
-            buyButton.text = $"КУПИТЬ ЗА {c.Cost} КК";
-            buyButton.clicked += () => Debug.Log($"Куплен контракт: {c.Name}");
+
+            // 2. ЛОГИКА "ВЫПОЛНЯЕТСЯ"
+            if (activeContract != null && activeContract.Id == c.Id)
+            {
+                buyButton.text = "ВЫПОЛНЯЕТСЯ";
+                buyButton.style.backgroundColor = new StyleColor(new Color(1f, 0.8f, 0f)); 
+                buyButton.style.color = new StyleColor(Color.black);
+                buyButton.SetEnabled(false); 
+            }
+            // 3. ЛОГИКА "НЕДОСТАТОЧНО ДЕНЕГ"
+            else if (playerMoney < c.Cost)
+            {
+                buyButton.text = "НЕДОСТАТОЧНО КК";
+                // Красный цвет
+                buyButton.style.backgroundColor = new StyleColor(new Color(0.8f, 0.2f, 0.2f));
+                buyButton.style.color = new StyleColor(Color.white);
+                buyButton.SetEnabled(false); // Кнопка неактивна
+            }
+            // 4. ОБЫЧНОЕ СОСТОЯНИЕ "КУПИТЬ"
+            else
+            {
+                buyButton.text = $"КУПИТЬ ЗА {c.Cost} КК";
+                // Зеленоватый цвет
+                buyButton.style.backgroundColor = new StyleColor(new Color(0.2f, 0.6f, 0.2f)); 
+                buyButton.style.color = new StyleColor(Color.white);
+
+                buyButton.clicked += () => 
+                {
+                    if(InventoryData.Instance.TrySpendMoney(c.Cost))
+                    {
+                        ContractManager.Instance.SetActiveContract(c);
+                        PopulateContractCards(); // Перерисовать кнопки
+                        UpdateHeaderInfo(); // Перерисовать баланс наверху
+                    }
+                };
+            }
 
             container.Add(card);
         }
     }
+
+    private void OnDestroy()
+    {
+        if (ContractManager.Instance != null) 
+            ContractManager.Instance.OnShopRefreshed -= PopulateContractCards;
+    }
+
+    #endregion
+
 
     // ====================================================================
     // ЗАПУСК ИГРЫ

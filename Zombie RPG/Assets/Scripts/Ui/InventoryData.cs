@@ -18,6 +18,7 @@ public class InventoryData : MonoBehaviour
     public SaveData currentData = new SaveData();
     public List<Potion> allPotions;
     public List<Boost> allBoosts;
+    public int ContractCoins = 200;
     
     private void Awake()
     {
@@ -39,6 +40,16 @@ public class InventoryData : MonoBehaviour
         for (int i = 0; i < currentData.potionSlotNames.Length; i++) currentData.potionSlotNames[i] = null;
         for (int i = 0; i < currentData.boostSlotNames.Length; i++) currentData.boostSlotNames[i] = null;
         for (int i = 0; i < currentData.boostMatchesRemaining.Length; i++) currentData.boostMatchesRemaining[i] = 0;
+    }
+
+    public bool TrySpendMoney(int amount)
+    {
+        if (ContractCoins >= amount)
+        {
+            ContractCoins -= amount;
+            return true;
+        }
+        return false;
     }
 
      public Potion GetPotionByName(string name)
