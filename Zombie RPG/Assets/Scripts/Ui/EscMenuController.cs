@@ -41,11 +41,42 @@ public class EscMenuController : MonoBehaviour
     private void Update()
     {
         if (SceneManager.GetActiveScene().name != "SampleScene") return;
+
+        if (IsPlayerDead())
+        {
+            if (isMenuOpen)
+            {
+                ForceCloseMenu();
+            }
+            return;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape)) ToggleMenu();
+    }
+
+    private bool IsPlayerDead()
+    {
+        if (PlayerMovement.Instance != null && PlayerMovement.Instance.IsDead)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ForceCloseMenu()
+    {
+        isMenuOpen = false;
+        root.style.display = DisplayStyle.None;
     }
 
     private void ToggleMenu()
     {
+        if (!isMenuOpen && IsPlayerDead())
+        {
+            return;
+        }
+
         isMenuOpen = !isMenuOpen;
         if (isMenuOpen)
         {

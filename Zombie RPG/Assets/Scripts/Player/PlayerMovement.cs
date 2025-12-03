@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections;
 using Unity.Mathematics;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -61,6 +62,41 @@ public class PlayerMovement : MonoBehaviour
     bool isGrounded;
     private Vector3 idleCamPos;
 
+    [Header("=== ЭКРАН СМЕРТИ ===")]
+    [SerializeField] private DeathScreenController deathScreen;
+    
+    [Header("Анимация смерти")]
+    [SerializeField] private float deathFallDuration = 1.5f;
+    [SerializeField] private float deathCameraFallAngle = 70f;
+    [SerializeField] private float deathCameraFallHeight = 0.8f;
+    [SerializeField] private AnimationCurve deathFallCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
+    [SerializeField] private float deathSlowMotionScale = 0.3f;
+    
+    [Header("Статистика")]
+    [SerializeField] private int zombiesKilled = 0;
+    [SerializeField] private int roundsSurvived = 1;
+
+    // === НОВОЕ: Состояние смерти ===
+    private bool isDead = false;
+    private Vector3 deathCameraStartPos;
+    private Quaternion deathCameraStartRot;
+
+    // Синглтон для доступа извне
+    public static PlayerMovement Instance { get; private set; }
+
+    // Публичные свойства для статистики
+    public int ZombiesKilled => zombiesKilled;
+    public int RoundsSurvived => roundsSurvived;
+    public bool IsDead => isDead;
+
+    void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+    }
+
     void Start()
     {
         currentStamina = maxStamina;
@@ -88,6 +124,11 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (isDead)
+        {
+            return;
+        }
+
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
         if (isGrounded && velocity.y < 0)
@@ -294,7 +335,6 @@ public class PlayerMovement : MonoBehaviour
     }
 
 
-    // функция для получения текущей стамины UI
     public float GetStaminaNormalized()
     {
         return currentStamina / maxStamina;
@@ -305,11 +345,157 @@ public class PlayerMovement : MonoBehaviour
         return currentHealth / (maxHealth * maxHealthModifier);
     }
 
-    private void Die()
-    {
-        Debug.Log("Игрок мертв!");
-        // логика проигрыша: экран смерти
 
+    private void Die()
+{
+    if (isDead) return;
+    isDead = true;
+
+    Debug.Log("Игрок мертв!");
+
+    // Останавливаем корутины
+    if (slowCoroutine != null)
+    {
+        StopCoroutine(slowCoroutine);
     }
+
+    // Отключаем CharacterController
+    if (controller != null)
+    {
+        controller.enabled = false;
+    }
+
+    // Запускаем анимацию смерти
+    StartCoroutine(DeathSequence());
+}
+
+private IEnumerator DeathSequence()
+{
+    // 1. Замедление времени
+    Time.timeScale = deathSlowMotionScale;
+
+    // 2. Анимация падения камеры
+    yield return StartCoroutine(CameraFallAnimation());
+
+    // 3. Восстанавливаем время
+    Time.timeScale = 1f;
+
+    // 4. Небольшая пауза
+    yield return new WaitForSecondsRealtime(0.3f);
+
+    // 5. Показываем экран смерти
+    ShowDeathScreen();
+}
+
+private IEnumerator CameraFallAnimation()
+{
+    if (cameraToShake == null) yield break;
+
+    float elapsed = 0f;
+
+    Vector3 startPos = cameraToShake.localPosition;
+    Quaternion startRot = cameraToShake.localRotation;
+
+    Vector3 endPos = startPos + new Vector3(0f, -deathCameraFallHeight, 0f);
+    Quaternion endRot = startRot * Quaternion.Euler(deathCameraFallAngle, 0f, UnityEngine.Random.Range(-15f, 15f));
+
+    // Начальная тряска
+    float shakeIntensity = 0.1f;
+    float shakeDuration = 0.15f;
+    float shakeElapsed = 0f;
+
+    while (shakeElapsed < shakeDuration)
+    {
+        shakeElapsed += Time.unscaledDeltaTime;
+
+        Vector3 shakeOffset = new Vector3(
+            UnityEngine.Random.Range(-shakeIntensity, shakeIntensity),
+            UnityEngine.Random.Range(-shakeIntensity, shakeIntensity),
+            UnityEngine.Random.Range(-shakeIntensity * 0.5f, shakeIntensity * 0.5f)
+        );
+
+        cameraToShake.localPosition = startPos + shakeOffset;
+        shakeIntensity *= 0.95f;
+
+        yield return null;
+    }
+
+    // Анимация падения
+    while (elapsed < deathFallDuration)
+    {
+        elapsed += Time.unscaledDeltaTime;
+        float t = Mathf.Clamp01(elapsed / deathFallDuration);
+        float curveValue = deathFallCurve.Evaluate(t);
+
+        cameraToShake.localPosition = Vector3.Lerp(startPos, endPos, curveValue);
+        cameraToShake.localRotation = Quaternion.Slerp(startRot, endRot, curveValue);
+
+        // Покачивание
+        if (t < 0.8f)
+        {
+            float wobble = Mathf.Sin(elapsed * 15f) * 0.02f * (1f - t);
+            cameraToShake.localPosition += new Vector3(wobble, 0f, 0f);
+        }
+
+        yield return null;
+    }
+
+    cameraToShake.localPosition = endPos;
+    cameraToShake.localRotation = endRot;
+
+    // Отскок
+    yield return StartCoroutine(CameraBounce(endPos));
+}
+
+private IEnumerator CameraBounce(Vector3 endPos)
+{
+    float bounceHeight = 0.05f;
+    float bounceDuration = 0.2f;
+    float elapsed = 0f;
+
+    while (elapsed < bounceDuration)
+    {
+        elapsed += Time.unscaledDeltaTime;
+        float t = elapsed / bounceDuration;
+        float bounce = Mathf.Sin(t * Mathf.PI) * bounceHeight * (1f - t);
+        cameraToShake.localPosition = endPos + new Vector3(0f, bounce, 0f);
+        yield return null;
+    }
+
+    cameraToShake.localPosition = endPos;
+}
+
+private void ShowDeathScreen()
+{
+
+    if (deathScreen != null)
+    {
+        deathScreen.Show();
+    }
+    else if (DeathScreenController.Instance != null)
+    {
+        DeathScreenController.Instance.Show();
+    }
+    else
+    {
+        Debug.LogError("DeathScreenController не найден!");
+        // Fallback - просто загружаем главное меню через 3 секунды
+        StartCoroutine(FallbackToMenu());
+    }
+}
+
+private IEnumerator FallbackToMenu()
+{
+    yield return new WaitForSecondsRealtime(3f);
+    Time.timeScale = 1f;
+    SceneManager.LoadScene("MainMenu");
+}
+
+
+[ContextMenu("Test Death")]
+private void TestDeath()
+{
+    Die();
+}
 
 }

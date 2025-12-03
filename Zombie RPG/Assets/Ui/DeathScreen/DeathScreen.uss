@@ -1,0 +1,232 @@
+
+:root {
+    --death-red: rgb(139, 0, 0);
+    --death-red-light: rgb(180, 30, 30);
+    --blood-red: rgb(102, 0, 0);
+    --text-white: rgb(255, 255, 255);
+    --text-gray: rgb(180, 180, 180);
+    --button-bg: rgb(60, 60, 60);
+    --button-hover: rgb(80, 80, 80);
+    --button-active: rgb(40, 40, 40);
+}
+
+.death-screen-hidden {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: none;
+    opacity: 0;
+}
+
+/* ==================== ВИДИМОЕ СОСТОЯНИЕ ==================== */
+.death-screen-visible {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    opacity: 1;
+    transition-property: opacity;
+    transition-duration: 1.5s;
+    transition-timing-function: ease-in;
+}
+
+/* ==================== ЗАТЕМНЕНИЕ ФОНА ==================== */
+.background-overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+}
+
+/* ==================== ЭФФЕКТ ВИНЬЕТКИ ==================== */
+.vignette {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    border-width: 80px;
+    border-color: rgba(139, 0, 0, 0.6);
+    border-radius: 50%;
+}
+
+.vignette-pulse {
+    transition-property: border-color;
+    transition-duration: 1s;
+    transition-timing-function: ease-in-out;
+    border-color: rgba(180, 30, 30, 0.8);
+}
+
+/* ==================== КОНТЕЙНЕР КОНТЕНТА ==================== */
+.content-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 50px;
+}
+
+/* ==================== ЗАГОЛОВОК ==================== */
+.death-title {
+    font-size: 72px;
+    color: var(--death-red);
+    -unity-font-style: bold;
+    letter-spacing: 8px;
+    text-shadow: 0 0 20px rgba(139, 0, 0, 0.8);
+    margin-bottom: 30px;
+    
+    /* Начальное состояние для анимации */
+    opacity: 0;
+    translate: 0 -50px;
+    scale: 0.8 0.8;
+}
+
+/* Анимация появления заголовка */
+.death-title-animated {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1 1;
+    transition-property: opacity, translate, scale;
+    transition-duration: 0.8s, 0.6s, 0.6s;
+    transition-timing-function: ease-out;
+    transition-delay: 0.5s;
+}
+
+
+.skull-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 40px;
+    background-color: var(--death-red);
+
+    border-radius: 50%;
+    
+    opacity: 0;
+    scale: 0 0;
+}
+
+.skull-icon-animated {
+    opacity: 1;
+    scale: 1 1;
+    transition-property: opacity, scale;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out;
+    transition-delay: 0.8s;
+}
+
+.stats-container {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px;
+    padding: 30px 60px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: var(--death-red);
+    
+    opacity: 0;
+    translate: 0 30px;
+}
+
+.stats-container-animated {
+    opacity: 1;
+    translate: 0 0;
+    transition-property: opacity, translate;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-out;
+    transition-delay: 1.2s;
+}
+
+.stat-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 350px;
+    margin: 10px 0;
+}
+
+.stat-label {
+    font-size: 24px;
+    color: var(--text-gray);
+    -unity-font-style: normal;
+}
+
+.stat-value {
+    font-size: 32px;
+    color: var(--text-white);
+    -unity-font-style: bold;
+    min-width: 80px;
+    -unity-text-align: middle-right;
+}
+
+.buttons-container {
+    flex-direction: column;
+    align-items: center;
+    
+    opacity: 0;
+    translate: 0 40px;
+}
+
+.buttons-container-animated {
+    opacity: 1;
+    translate: 0 0;
+    transition-property: opacity, translate;
+    transition-duration: 0.6s;
+    transition-timing-function: ease-out;
+    transition-delay: 1.6s;
+}
+
+.death-button {
+    width: 280px;
+    height: 60px;
+    margin: 10px;
+    font-size: 22px;
+    -unity-font-style: bold;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    border-width: 2px;
+    
+    transition-property: background-color, scale, border-color;
+    transition-duration: 0.15s;
+    transition-timing-function: ease-out;
+}
+
+.death-button:hover {
+    scale: 1.05 1.05;
+}
+
+.death-button:active {
+    scale: 0.98 0.98;
+}
+
+.menu-button {
+    background-color: var(--button-bg);
+    border-color: rgb(100, 100, 100);
+    color: var(--text-white);
+}
+
+.menu-button:hover {
+    background-color: var(--button-hover);
+    border-color: rgb(140, 140, 140);
+}
+
+.menu-button:active {
+    background-color: var(--button-active);
+}
+
+.stat-value-pulse {
+    scale: 1.2 1.2;
+    color: var(--death-red-light);
+    transition-property: scale, color;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}
+
+.stat-value-normal {
+    scale: 1 1;
+    color: var(--text-white);
+    transition-property: scale, color;
+    transition-duration: 0.3s;
+    transition-timing-function: ease-out;
+}

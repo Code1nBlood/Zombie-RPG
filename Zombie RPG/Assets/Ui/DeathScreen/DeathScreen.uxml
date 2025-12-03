@@ -1,0 +1,24 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Ui/DeathScreen/DeathScreen.uss?fileID=7433441132597879392&amp;guid=17f6edf58e0c0df448a3c02894026b33&amp;type=3#DeathScreen" />
+    <ui:VisualElement name="death-screen-root" class="death-screen-hidden">
+        <ui:VisualElement name="background-overlay" class="background-overlay" />
+        <ui:VisualElement name="vignette" class="vignette" />
+        <ui:VisualElement name="content-container" class="content-container">
+            <ui:Label name="death-title" text="ВЫ ПОГИБЛИ" class="death-title" />
+            <ui:VisualElement name="skull-icon" class="skull-icon" />
+            <ui:VisualElement name="stats-container" class="stats-container">
+                <ui:VisualElement name="stat-row" class="stat-row">
+                    <ui:Label name="zombies-label" text="Убито зомби:" class="stat-label" />
+                    <ui:Label name="zombies-value" text="0" class="stat-value" />
+                </ui:VisualElement>
+                <ui:VisualElement name="stat-row" class="stat-row">
+                    <ui:Label name="rounds-label" text="Пережито раундов:" class="stat-label" />
+                    <ui:Label name="rounds-value" text="0" class="stat-value" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="buttons-container" class="buttons-container">
+                <ui:Button name="menu-button" text="ВЫЙТИ В МЕНЮ" class="death-button menu-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
