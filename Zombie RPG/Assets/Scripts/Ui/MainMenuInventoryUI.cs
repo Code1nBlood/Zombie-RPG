@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class MainMenuInventoryUI : MonoBehaviour
 {
@@ -20,6 +21,7 @@ public class MainMenuInventoryUI : MonoBehaviour
     private VisualElement draggedSource;
     private bool isDragging;
     private VisualElement dragPreview;
+    public event Action OnClosed;
 
     private void Awake()
     {
@@ -35,18 +37,56 @@ public class MainMenuInventoryUI : MonoBehaviour
         RefreshInventoryDisplay();
     }
 
+    
+
     private void CreateInventoryWindow()
     {
         inventoryWindow = inventoryUxml.Instantiate();
         inventoryWindow.style.flexGrow = 1;
 
         var closeBtn = inventoryWindow.Q<Button>("CloseButton");
-        if (closeBtn != null) closeBtn.clicked += CloseInventory;
+        if (closeBtn != null)
+        {
+            closeBtn.clicked += OnCloseButtonClicked;
+            closeBtn.RegisterCallback<MouseEnterEvent>(evt => PlayHoverSound());
+        }
 
         InitializeQuickSlots();
         InitializeLists();
         SetupDragAndDrop();
     }
+
+    private void OnCloseButtonClicked()
+    {
+        PlayClickSound();
+        PlayCloseSound();
+        CloseInventory();
+    }
+
+    public void CloseInventoryBTN()
+    {
+        uiDocument.rootVisualElement.Clear();
+        OnClosed?.Invoke();
+    }
+
+    #region === ЗВУКИ ===
+
+    private void PlayClickSound()
+    {
+        AudioManager.Instance?.PlaySFX(SFXType.ButtonClick);
+    }
+
+    private void PlayHoverSound()
+    {
+        AudioManager.Instance?.PlaySFX(SFXType.ButtonHover, 0.5f);
+    }
+
+    private void PlayCloseSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.MenuClose);
+    }
+
+    #endregion
 
     private void InitializeQuickSlots()
     {

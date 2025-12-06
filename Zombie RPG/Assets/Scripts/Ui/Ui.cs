@@ -24,6 +24,8 @@ public class Ui : MonoBehaviour
 
     private void Start()
     {
+        AudioManager.Instance.LoadVolumeSettings();
+        AudioManager.Instance.PlayMusic(MusicType.MainMenu);
         if (ContractManager.Instance == null)
         {
             var go = new GameObject("ContractManager_Global");
@@ -75,16 +77,84 @@ public class Ui : MonoBehaviour
     {
         var btnInventory = mainMenu.Q<Button>("btnInventory");
         if (btnInventory != null)
-            btnInventory.clicked += OpenInventory;
+        {
+            btnInventory.clicked += () =>
+            {
+                PlayClickSound();
+                OpenInventory();
+            };
+            AddHoverSound(btnInventory);
+        }
 
         var btnContracts = mainMenu.Q<Button>("btnContracts");
         if (btnContracts != null)
-            btnContracts.clicked += OpenContracts;
+        {
+            btnContracts.clicked += () =>
+            {
+                PlayClickSound();
+                OpenContracts();
+            };
+            AddHoverSound(btnContracts);
+        }
 
         var btnPlay = mainMenu.Q<Button>("btnPlay");
         if (btnPlay != null)
-            btnPlay.clicked += StartGame;
+        {
+            btnPlay.clicked += () =>
+            {
+                PlayClickSound();
+                StartGame();
+            };
+            AddHoverSound(btnPlay);
+        }
     }
+
+    #region === ЗВУКИ ===
+
+    private void PlayClickSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.ButtonClick);
+    }
+
+    private void PlayHoverSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.ButtonHover, 0.5f);
+    }
+
+    private void PlaySuccessSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.Success);
+    }
+
+    private void PlayFailSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.Fail);
+    }
+
+    private void PlayOpenSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.MenuOpen);
+    }
+
+    private void PlayCloseSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.MenuClose);
+    }
+
+    private void PlayPurchaseSound()
+    {
+        AudioManager.Instance.PlaySFX(SFXType.Purchase);
+    }
+
+    // Добавляет звук при наведении на кнопку
+
+    private void AddHoverSound(Button button)
+    {
+        button.RegisterCallback<MouseEnterEvent>(evt => PlayHoverSound());
+    }
+
+    #endregion
+
 
     // ====================================================================
     // ИНВЕНТАРЬ
@@ -92,35 +162,20 @@ public class Ui : MonoBehaviour
 
     private void OpenInventory()
     {
-        if (inventoryUI != null)
-        {
-            // Скрываем главное меню
-            mainMenu.style.display = DisplayStyle.None;
-            inventoryUI.ShowInventory();
-
-            // Подписываемся на закрытие инвентаря (один раз!)
-            inventoryUI.GetType().GetMethod("OnInventoryClosed")?.Invoke(inventoryUI, null);
-            // Лучше — через публичное событие (рекомендую добавить в MainMenuInventoryUI)
-            // Но пока сделаем через коллбэк:
-            StartCoroutine(WaitForInventoryClose());
-        }
-        else
-        {
-            Debug.LogError("MainMenuInventoryUI не найден на сцене! Добавьте объект с этим скриптом.");
-        }
-    }
-
-    // Вариант A: Через корутину (работает сразу)
-    private System.Collections.IEnumerator WaitForInventoryClose()
+        PlayOpenSound();
+    
+    if (inventoryUI != null)
     {
-        // Ждём, пока инвентарь не исчезнет из root
-        while (uiDocument.rootVisualElement.childCount > 0 &&
-               uiDocument.rootVisualElement[0].name.Contains("Inventory")) // или проверка по классу
-        {
-            yield return null;
-        }
+        mainMenu.style.display = DisplayStyle.None;
+        inventoryUI.OnClosed += OnInventoryClosed;
+        inventoryUI.ShowInventory();
+    }
+}
 
-        // Инвентарь закрыт → возвращаемся в главное меню
+    private void OnInventoryClosed()
+    {
+        PlayCloseSound();
+        inventoryUI.OnClosed -= OnInventoryClosed;
         ShowMainMenu();
     }
     #region КОНТРАКТЫ
@@ -131,6 +186,7 @@ public class Ui : MonoBehaviour
 
     private void OpenContracts()
     {
+        PlayOpenSound();
         if (contractsWindow == null)
             CreateContractsWindow();
 
@@ -141,6 +197,7 @@ public class Ui : MonoBehaviour
 
     private void CloseContracts()
     {
+        PlayCloseSound();
         uiDocument.rootVisualElement.Clear();
         ShowMainMenu();
         isMenuOpen = false;
@@ -152,10 +209,16 @@ public class Ui : MonoBehaviour
         contractsWindow.style.flexGrow = 1;
 
         var closeButton = contractsWindow.Q<Button>("closeButton");
-        closeButton.clicked += CloseContracts;
+        closeButton.clicked += () =>
+        {
+            PlayClickSound();
+            CloseContracts();
+        };
+        AddHoverSound(closeButton);
 
         paidRefreshButton = contractsWindow.Q<Button>("paidRefreshButton");
         paidRefreshButton.clicked += OnRefreshClicked;
+        AddHoverSound(paidRefreshButton);
 
         freeRefreshLabel = contractsWindow.Q<Label>("freeRefreshLabel");
         currencyLabel = contractsWindow.Q<Label>("currencyLabel");
@@ -165,18 +228,25 @@ public class Ui : MonoBehaviour
 
     private void OnRefreshClicked()
     {
+        PlayClickSound();
         var timeRemaining = ContractManager.Instance.GetTimeUntilFreeRefresh();
 
         if (timeRemaining <= TimeSpan.Zero)
         {
             ContractManager.Instance.TryRefreshShop(false);
+            PlaySuccessSound();
         }
         else
         {
             // обновить платно
             bool success = ContractManager.Instance.TryRefreshShop(true);
-            if (!success)
+            if (success)
             {
+                PlayPurchaseSound();
+            }
+            else
+            {
+                PlayFailSound();
                 Debug.Log("Недостаточно денег для обновления!");
             }
         }
@@ -235,6 +305,7 @@ public class Ui : MonoBehaviour
             card.Q<Label>("contractReward").text = c.RewardText;
 
             var buyButton = card.Q<Button>("buyButton");
+            AddHoverSound(buyButton);
 
             // 2. ЛОГИКА "ВЫПОЛНЯЕТСЯ"
             if (activeContract != null && activeContract.Id == c.Id)
@@ -263,6 +334,7 @@ public class Ui : MonoBehaviour
 
                 buyButton.clicked += () => 
                 {
+                    PlayPurchaseSound();
                     if(InventoryData.Instance.TrySpendMoney(c.Cost))
                     {
                         ContractManager.Instance.SetActiveContract(c);
@@ -291,6 +363,8 @@ public class Ui : MonoBehaviour
 
     private void StartGame()
     {
+        AudioManager.Instance.PlaySFX(SFXType.GameStart);
+        AudioManager.Instance.StopMusic(1f);
         // Убедимся, что InventoryData существует
         if (InventoryData.Instance == null)
         {
