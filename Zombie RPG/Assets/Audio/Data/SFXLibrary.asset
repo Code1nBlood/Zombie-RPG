@@ -25,3 +25,12 @@ MonoBehaviour:
   - type: 2
     clips:
     - {fileID: 8300000, guid: 104d2aecf578d4545b4a21645a3b86e1, type: 3}
+  - type: 10
+    clips:
+    - {fileID: 8300000, guid: d7e7e0ab1def85c42b340df64ecf2434, type: 3}
+  - type: 11
+    clips:
+    - {fileID: 8300000, guid: fbe1c38d43d572b41adeca6cca779cee, type: 3}
+  - type: 12
+    clips:
+    - {fileID: 8300000, guid: fa3a7f4b1c79ebf4ba1d1eeae289d04b, type: 3}

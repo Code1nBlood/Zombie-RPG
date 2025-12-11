@@ -13,6 +13,11 @@ public enum SFXType
     Footstep,
     Hurt,
     Death,
+
+    // UFO
+    laserChargeSound,
+    laserFireSound,
+    ufoPassWallSound,
     
     // Game
     GameStart,

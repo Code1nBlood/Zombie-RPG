@@ -163,6 +163,7 @@ GameObject:
   - component: {fileID: 4662206040335263425}
   - component: {fileID: 4513384175231931279}
   - component: {fileID: 5234340273954340932}
+  - component: {fileID: 8257342681880627347}
   m_Layer: 0
   m_Name: ufoobj
   m_TagString: Untagged
@@ -201,11 +202,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UFOHoverNavMesh
   maxHealth: 100
   attackDamage: 25
-  attackDistance: 4
-  attackCooldown: 4
+  attackDistance: 9
+  attackCooldown: 6
   detectionRange: 25
   idleSpeed: 4
   chaseSpeed: 9
+  laserChargeTime: 0.5
+  laserDuration: 0.8
+  laserWidth: 0.15
+  laserColorStart: {r: 1, g: 0, b: 0, a: 1}
+  laserColorEnd: {r: 1, g: 0.3, b: 0, a: 1}
+  laserMaterial: {fileID: 0}
+  laserHitEffectPrefab: {fileID: 5704630910233758546, guid: 523b22289d10e64449d583079c422cc7, type: 3}
+  laserChargeEffectPrefab: {fileID: 790657720381496942, guid: f583809f2250d464d9fba71d3ff002f2, type: 3}
   hoverHeight: 6
   heightSmoothTime: 0.25
   xBounds: {x: -38.3, y: 13.1}
@@ -215,8 +224,17 @@ MonoBehaviour:
   pitchAmp: 5
   yawAmp: 18
   swayFreq: 1
+  groundLayerMask:
+    serializedVersion: 2
+    m_Bits: 64
+  wallLayerMask:
+    serializedVersion: 2
+    m_Bits: 128
+  wallSoundCooldown: 0.25
   body: {fileID: 423205305393348066}
   facePivot: {fileID: 5311720364256816917}
+  laserOrigin: {fileID: 5311720364256816917}
+  experienceReward: 50
 --- !u!143 &5234340273954340932
 CharacterController:
   m_ObjectHideFlags: 0
@@ -242,6 +260,33 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0.17, y: 1.12, z: 0}
+--- !u!54 &8257342681880627347
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3014056385531715693}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &4471024783477089535
 GameObject:
   m_ObjectHideFlags: 0
