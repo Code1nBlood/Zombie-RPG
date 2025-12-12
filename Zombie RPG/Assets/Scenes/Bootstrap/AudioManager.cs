@@ -39,7 +39,6 @@ public class AudioManager : MonoBehaviour
 
     private void Initialize()
     {
-        // Пул для SFX
         for (int i = 0; i < poolSize; i++)
         {
             var source = gameObject.AddComponent<AudioSource>();
@@ -55,11 +54,9 @@ public class AudioManager : MonoBehaviour
         musicSource.playOnAwake = false;
     }
 
-    #region === SFX ===
+    #region SFX 
 
-    /// <summary>
-    /// Воспроизвести звук по типу
-    /// </summary>
+    // Воспроизвести звук по типу
     public void PlaySFX(SFXType type, float volume = 1f, float pitch = 1f)
     {
         AudioClip clip = sfxLibrary.GetClip(type);
@@ -67,9 +64,8 @@ public class AudioManager : MonoBehaviour
             PlayClip(clip, volume, pitch);
     }
 
-    /// <summary>
-    /// Воспроизвести конкретный клип
-    /// </summary>
+    // Воспроизвести конкретный клип
+
     public void PlayClip(AudioClip clip, float volume = 1f, float pitch = 1f)
     {
         if (clip == null) return;
@@ -81,18 +77,14 @@ public class AudioManager : MonoBehaviour
         source.Play();
     }
 
-    /// <summary>
-    /// Воспроизвести случайный звук из массива
-    /// </summary>
+    // Воспроизвести случайный звук
     public void PlayRandomClip(AudioClip[] clips, float volume = 1f, float pitch = 1f)
     {
         if (clips == null || clips.Length == 0) return;
         PlayClip(clips[Random.Range(0, clips.Length)], volume, pitch);
     }
 
-    /// <summary>
-    /// Воспроизвести звук с рандомным питчем (для разнообразия)
-    /// </summary>
+    // Воспроизвести звук с рандомным питчем 
     public void PlaySFXRandomized(SFXType type, float volume = 1f, float pitchMin = 0.9f, float pitchMax = 1.1f)
     {
         PlaySFX(type, volume, Random.Range(pitchMin, pitchMax));
@@ -103,18 +95,15 @@ public class AudioManager : MonoBehaviour
         foreach (var source in pool)
             if (!source.isPlaying) return source;
 
-        // Все заняты - останавливаем первый
         pool[0].Stop();
         return pool[0];
     }
 
     #endregion
 
-    #region === Music ===
+    #region Music 
 
-    /// <summary>
-    /// Включить музыку по типу
-    /// </summary>
+    // Включить музыку по типу
     public void PlayMusic(MusicType type, float fadeTime = 1f)
     {
         AudioClip clip = musicLibrary.GetClip(type);
@@ -122,9 +111,7 @@ public class AudioManager : MonoBehaviour
             PlayMusicClip(clip, fadeTime);
     }
 
-    /// <summary>
-    /// Включить конкретный музыкальный клип
-    /// </summary>
+    // Включить конкретный музыкальный клип
     public void PlayMusicClip(AudioClip clip, float fadeTime = 1f)
     {
         if (clip == null) return;
@@ -135,9 +122,7 @@ public class AudioManager : MonoBehaviour
         fadeCoroutine = StartCoroutine(FadeToMusic(clip, fadeTime));
     }
 
-    /// <summary>
-    /// Остановить музыку
-    /// </summary>
+    // Остановить музыку
     public void StopMusic(float fadeTime = 1f)
     {
         if (fadeCoroutine != null)
@@ -146,9 +131,7 @@ public class AudioManager : MonoBehaviour
         fadeCoroutine = StartCoroutine(FadeOutMusic(fadeTime));
     }
 
-    /// <summary>
-    /// Пауза/продолжение музыки
-    /// </summary>
+    // Пауза/продолжение музыки
     public void PauseMusic(bool pause)
     {
         if (pause) musicSource.Pause();
@@ -157,7 +140,6 @@ public class AudioManager : MonoBehaviour
 
     private IEnumerator FadeToMusic(AudioClip newClip, float fadeTime)
     {
-        // Fade out текущую
         if (musicSource.isPlaying)
         {
             yield return FadeVolume(musicSource.volume, 0f, fadeTime * 0.5f);
@@ -169,7 +151,6 @@ public class AudioManager : MonoBehaviour
         musicSource.volume = 0f;
         musicSource.Play();
 
-        // Fade in
         yield return FadeVolume(0f, 1f, fadeTime * 0.5f);
     }
 
@@ -184,7 +165,7 @@ public class AudioManager : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < duration)
         {
-            elapsed += Time.unscaledDeltaTime; // unscaled чтобы работало на паузе
+            elapsed += Time.unscaledDeltaTime; 
             musicSource.volume = Mathf.Lerp(from, to, elapsed / duration);
             yield return null;
         }
@@ -193,7 +174,7 @@ public class AudioManager : MonoBehaviour
 
     #endregion
 
-    #region === Volume Control ===
+    #region Volume Control 
 
     public void SetMasterVolume(float value)
     {
@@ -219,9 +200,7 @@ public class AudioManager : MonoBehaviour
         return Mathf.Log10(Mathf.Max(value, 0.0001f)) * 20f;
     }
 
-    /// <summary>
-    /// Загрузить сохранённые настройки громкости
-    /// </summary>
+    // Загрузить сохранённые настройки громкости
     public void LoadVolumeSettings()
     {
         SetMasterVolume(PlayerPrefs.GetFloat("MasterVolume", 1f));
