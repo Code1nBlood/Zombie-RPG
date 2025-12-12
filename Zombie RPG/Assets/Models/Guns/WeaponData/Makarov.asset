@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ac24da1218686f45a758b88177b7f6d, type: 3}
+  m_Name: Makarov
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  weaponName: Makarov
+  maxAmmoInClip: 8
+  damage: 10
+  fireRate: 2
+  range: 30
+  shellEjectionForce: 3
+  weaponPrefab: {fileID: 8137372736733844660, guid: 1fc549559ec11e8418f0b291014e454d, type: 3}
+  weaponAnimatorController: {fileID: 9100000, guid: 53213324e9b384640b8b88988b7cdc61, type: 2}
+  fireSound: {fileID: 8300000, guid: 507869344cd09fd4aade6a41cfc5a742, type: 3}
+  reloadSound: {fileID: 8300000, guid: 975a224dc3f6d114d8c67a575fef3c94, type: 3}
+  shellCasingPrefab: {fileID: 919132149155446097, guid: a7e2b1519d62207479d24d98280df1af, type: 3}
