@@ -2,24 +2,33 @@ using UnityEngine;
 
 public class Noise : MonoBehaviour
 {
-    float noiseRadius =50f;
-    float noiseCooldown = 0.3f;
-    float lastNoiseTime = 0f;
+    [Header("Шум")]
+    public float baseRadius = 50f;      // Базовый радиус
+    public float noiseCooldown = 0.3f;  // КД между шумами
+    public LayerMask zombieMask;        // Слой зомби
 
+    private float lastNoiseTime = -999f;
+
+    /// <summary>
+    /// power = множитель громкости (0.2f - тихо, 3f - ОЧЕНЬ громко)
+    /// </summary>
     public void makeNoise(float power)
     {
-        if(Time.time-lastNoiseTime<noiseCooldown)return;
+        if (Time.time - lastNoiseTime < noiseCooldown) return;
         lastNoiseTime = Time.time;
-        float radius = noiseRadius*power;
-        Collider[] hits = Physics.OverlapSphere(transform.position, radius);
-        foreach(var hit in hits)
+
+        float radius = baseRadius * power;
+        Collider[] hits = Physics.OverlapSphere(transform.position, radius, zombieMask);
+
+        foreach (var hit in hits)
         {
             ZombieAi zombie = hit.GetComponent<ZombieAi>();
             if (zombie != null)
             {
-                print("Зомби найден!");
+                // Debug.Log("Зомби услышал шум");
                 zombie.OnHeardNoise(transform.position);
             }
         }
+
     }
 }

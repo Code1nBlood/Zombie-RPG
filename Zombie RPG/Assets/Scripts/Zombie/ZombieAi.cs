@@ -21,7 +21,7 @@ public class ZombieAi : MonoBehaviour, IEnemy
     private float fAS; //finalAttackSpeed
     [Header("Health")]
     public float maxHealth = 50f; // Базовое HP
-    private float currentHealth;
+    public float currentHealth {get;private set;}
     [Header("Attack")]
     public float attackRange = 5f;
     public float attackDamage = 20f;
@@ -70,6 +70,7 @@ public class ZombieAi : MonoBehaviour, IEnemy
     {
         PickNewWanderPoint();
         Rotate();
+        currentHealth = maxHealth;
         player = GameObject.FindGameObjectWithTag("Player").transform;
         playerMovement = player.GetComponent<PlayerMovement>();
     }
@@ -97,12 +98,30 @@ public class ZombieAi : MonoBehaviour, IEnemy
         switch (currentState)
         {
             case State.Chase:
-                if(Time.time - lastAttackTime< fAS) break;
-                if (canAttack())
+                bool isAttackInProgress = Time.time < lastAttackTime + fAS;
+                if (isAttackInProgress)
                 {
-                    TryAttackPlayer();
+                    // Если атака в процессе:
+                    // ОСТАНАВЛИВАЕМ NavMeshAgent, чтобы зомби не двигался.
+                    if (agent.isActiveAndEnabled)
+                    {
+                        agent.isStopped = true;
+                    }
                 }
-                agent.SetDestination(player.position);
+                else
+                {
+                    if (agent.isActiveAndEnabled)
+                    {
+                        agent.isStopped = false;
+                    }
+                    if(Time.time - lastAttackTime< fAS) break;
+                    if (canAttack())
+                    {
+                        TryAttackPlayer();
+                    }
+                    agent.SetDestination(player.position);
+                }
+
                 Rotate();
                 break;
 
