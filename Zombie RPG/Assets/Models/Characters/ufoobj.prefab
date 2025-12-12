@@ -217,7 +217,7 @@ MonoBehaviour:
   laserChargeEffectPrefab: {fileID: 790657720381496942, guid: f583809f2250d464d9fba71d3ff002f2, type: 3}
   hoverHeight: 6
   heightSmoothTime: 0.25
-  xBounds: {x: -38.3, y: 13.1}
+  xBounds: {x: -33.9, y: 13.1}
   zBounds: {x: -54.7, y: 84.8}
   boundaryPush: 12
   rollAmp: 10
@@ -229,8 +229,9 @@ MonoBehaviour:
     m_Bits: 64
   wallLayerMask:
     serializedVersion: 2
-    m_Bits: 128
+    m_Bits: 129
   wallSoundCooldown: 0.25
+  wallCheckRadius: 2
   body: {fileID: 423205305393348066}
   facePivot: {fileID: 5311720364256816917}
   laserOrigin: {fileID: 5311720364256816917}
@@ -254,12 +255,12 @@ CharacterController:
   m_Enabled: 1
   serializedVersion: 3
   m_Height: 1
-  m_Radius: 1.88
+  m_Radius: 1.6
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0.17, y: 1.12, z: 0}
+  m_Center: {x: 0.08, y: 1.15, z: -0.01}
 --- !u!54 &8257342681880627347
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -1948,16 +1948,24 @@ PrefabInstance:
       value: ufoobj
       objectReference: {fileID: 0}
     - target: {fileID: 4513384175231931279, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: wallLayerMask.m_Bits
-      value: 129
+      propertyPath: xBounds.x
+      value: -41.9
       objectReference: {fileID: 0}
     - target: {fileID: 4513384175231931279, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: groundLayerMask.m_Bits
-      value: 64
+      propertyPath: xBounds.y
+      value: 7.14
+      objectReference: {fileID: 0}
+    - target: {fileID: 4513384175231931279, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
+      propertyPath: zBounds.x
+      value: -82.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4513384175231931279, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
+      propertyPath: zBounds.y
+      value: 81.8
       objectReference: {fileID: 0}
     - target: {fileID: 4662206040335263425, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.14
+      value: -7.5
       objectReference: {fileID: 0}
     - target: {fileID: 4662206040335263425, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1994,26 +2002,6 @@ PrefabInstance:
     - target: {fileID: 4662206040335263425, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5234340273954340932, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: m_Radius
-      value: 1.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5234340273954340932, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5234340273954340932, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: m_Center.x
-      value: 0.08
-      objectReference: {fileID: 0}
-    - target: {fileID: 5234340273954340932, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: m_Center.y
-      value: 1.15
-      objectReference: {fileID: 0}
-    - target: {fileID: 5234340273954340932, guid: 7c5f1cf04ca055d4a97e49752d08811a, type: 3}
-      propertyPath: m_Center.z
-      value: -0.01
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

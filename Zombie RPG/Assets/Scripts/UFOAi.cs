@@ -407,6 +407,21 @@ public class UFOFlyingEnemy : MonoBehaviour, IEnemy
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, attackDistance);
 
+        float xMin = xBounds.x;
+        float xMax = xBounds.y;
+        float zMin = zBounds.x;
+        float zMax = zBounds.y;
+
+        Vector3 center = new Vector3((xMin + xMax) * 0.5f, transform.position.y, (zMin + zMax) * 0.5f);
+        Vector3 size   = new Vector3(Mathf.Abs(xMax - xMin), 0.2f, Mathf.Abs(zMax - zMin)); // тонкая "плашка"
+
+        // заливка + контур
+        Gizmos.color = new Color(0f, 1f, 0f, 0.15f);
+        Gizmos.DrawCube(center, size);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(center, size);
+
         // Радиус проверки стен
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, wallCheckRadius);
