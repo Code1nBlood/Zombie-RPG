@@ -281,7 +281,7 @@ public class ZombieAi : MonoBehaviour, IEnemy
     }
 
     public int ExperienceReward => 10;
-    public void TakeDamage(float damage, bool isHeadshot)
+    public void TakeDamage(float damage, bool isHeadshot = false)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)

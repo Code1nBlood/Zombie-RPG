@@ -137,13 +137,10 @@ public class GunFireController : MonoBehaviour
             }
             else
             {
-                // 2. ПРОВЕРКА ТЕЛА (Ищем ZombieAi на самом объекте или его родителе)
                 ZombieAi zombie = hit.collider.GetComponentInParent<ZombieAi>();
-                
                 if (zombie != null)
                 {
-                    // Попадание в тело: наносим базовый урон.
-                    zombie.TakeDamage(damage);
+                    zombie.TakeDamage(damage, false);  // ✅ isHeadshot = false
                     Debug.Log($"Попадание в тело. Оставшееся хп: {zombie.currentHealth}");
                 }
             }
